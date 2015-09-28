@@ -1,0 +1,43 @@
+@import 'includes/mixins';
+
+.nobox();
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.wrapper {
+  margin-top: 40px;
+
+  .content, .bottom {
+    width: 400px;
+    margin: 0 auto;
+  }
+
+  .bottom {
+    border: 1px solid blue;
+  }
+}
+
+.is-sticky {
+  border: 1px solid gray;
+
+  &.floated {
+    float: right;
+    height: 400px;
+    background: silver;
+  }
+
+  &.fixed {
+    background: silver;
+    position: fixed;
+    height: 40px;
+    width: 100%;
+    top: 0;
+  }
+
+  &.stuck {
+    border: 1px solid red;
+  }
+}

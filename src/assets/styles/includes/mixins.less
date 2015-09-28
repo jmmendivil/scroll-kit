@@ -1,0 +1,15 @@
+.nobox() {
+  *,
+  *:after,
+  *:before {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+}
+
+.box-shadow(@left: 0px, @top: 0px, @blur: 5px, @color: #555) {
+  -moz-box-shadow: @left @top @blur @color;
+  -webkit-box-shadow: @left @top @blur @color;
+  box-shadow: @left @top @blur @color;
+}
