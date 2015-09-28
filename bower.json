@@ -1,0 +1,15 @@
+{
+  "name": "estucko",
+  "version": "0.0.0",
+  "dependencies": {
+    "vanilla-viewport": "~0.0.2",
+    "semantic-ui-grid": "~2.1.4",
+    "sticky-kit": "~1.1.2",
+    "jquery": "~2.1.4"
+  },
+  "overrides": {
+    "vanilla-viewport": {
+      "main": "viewport.js"
+    }
+  }
+}
