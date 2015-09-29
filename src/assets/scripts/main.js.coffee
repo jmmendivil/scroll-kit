@@ -1,4 +1,5 @@
 win = $(window)
+height = win.height()
 
 stack = {}
 stickies = []
@@ -14,6 +15,7 @@ placeholder = (node, params) ->
     height: node.height
     float: node.el.css('float')
     position: node.el.css('position')
+    verticalAlign: node.el.css('vertical-align')
 
   $('<div/>').css(fixed).css('display', 'none').insertBefore(node.el)
 
@@ -31,23 +33,28 @@ initialize_sticky = (node, params = {}) ->
     data: data
     offset: node.offset()
     position: node.position()
-    width: node.outerWidth()
-    height: node.outerHeight()
+    width: node.outerWidth(true)
+    height: node.outerHeight(true)
     display: node.css('display')
-
-  unless data.fixed
-    node.placeholder = placeholder(node, data)
 
   unless stack[data.group]
     # TODO: reuse another stack for initial offsets
     stack[data.group] = stack.all or 0
 
+  parent_top = parent.offset().top
+  parent_height = parent.outerHeight(true)
+
   node.offset_top = stack[data.group]
   node.passing_top = node.offset.top - node.offset_top
   node.passing_height = node.height + node.offset_top
-  node.passing_bottom = parent.offset().top + parent.outerHeight()
+  node.passing_bottom = parent_top + parent_height
+
+  data.fixed = true if node.height >= parent_height
 
   stack[data.group] += node.height
+
+  unless data.fixed
+    node.placeholder = placeholder(node, data)
 
   stickies.push node
 
@@ -103,4 +110,6 @@ window._update = update_all_stickies
 $.fn.velcro = (params = {}) ->
   @each ->
     initialize_sticky $(this), params
-    calculate_all_stickes()
+
+  setTimeout(calculate_all_stickes, 0)
+  @
