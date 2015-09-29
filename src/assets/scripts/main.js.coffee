@@ -1,5 +1,4 @@
 win = $(window)
-doc = $(document.documentElement)
 
 currentState =
   stack: {}
