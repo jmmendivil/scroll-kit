@@ -12,7 +12,6 @@ debounce = (fn, n) ->
 
 placeholder = (node, params) ->
   css =
-    position: node.el.position()
     cssFloat: node.el.css('float')
     cssDisplay: node.el.css('display')
     cssPosition: node.el.css('position')
@@ -42,6 +41,7 @@ init_stickies = ->
       el: node
       data: data
       offset: node.offset()
+      position: node.position()
       width: node.outerWidth()
       height: node.outerHeight()
       isFixed: node.hasClass('fixed')
@@ -86,7 +86,8 @@ onScroll = ->
         unless sticky.node.el.hasClass('bottom')
           sticky.node.el.addClass('bottom').css
             position: 'absolute'
-            left: 'auto'
+            left: sticky.node.position.left
+            bottom: 0
             top: 'auto'
       else
         if sticky.node.el.hasClass('bottom')
