@@ -6,7 +6,7 @@ html
     title Stickys FTW! D:
   body
     .wrapper
-      .is-sticky.fixed TOP HEADING / MENU
+      .is-sticky.fixed(data-sticky={fixed:true}) TOP HEADING / MENU
 
       p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
 
@@ -40,7 +40,9 @@ html
         p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
         p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
 
-        .is-sticky.floated A SIDEBAR / PLAYLIST
+        .floated
+          p A SIDEBAR / PLAYLIST
+          .is-sticky FUAAAAA
 
         p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
         p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
@@ -63,3 +65,5 @@ html
     script(src='vendor/jquery/dist/jquery.js')
     //- script(src='vendor/sticky-kit/jquery.sticky-kit.js')
     script(src='js/main.js')
+    script.
+      $('.is-sticky').velcro()

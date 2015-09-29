@@ -1,8 +1,12 @@
 win = $(window)
 
-currentState =
-  stack: {}
-  stickies: []
+stack = {}
+stickies = []
+
+debounce = (fn, n) ->
+  ->
+    clearTimeout fn.t
+    fn.t = setTimeout fn, n
 
 placeholder = (node, params) ->
   fixed =
@@ -13,53 +17,49 @@ placeholder = (node, params) ->
 
   $('<div/>').css(fixed).css('display', 'none').insertBefore(node.el)
 
-init_stickies = ->
-  $('.is-sticky').each ->
-    node = $(@)
+initialize_sticky = (node, params = {}) ->
+  data = $.extend({}, params, node.data('sticky') or {})
+  data.group or= 'all'
 
-    data = node.data('sticky') or {}
-    data.group or= 'all'
+  parent = if data.parent
+    $(data.parent)
+  else
+    node.parent()
 
-    parent = if data.parent
-      $(data.parent)
-    else
-      node.parent()
+  node =
+    el: node
+    data: data
+    offset: node.offset()
+    position: node.position()
+    width: node.outerWidth()
+    height: node.outerHeight()
+    display: node.css('display')
 
-    node =
-      el: node
-      data: data
-      offset: node.offset()
-      position: node.position()
-      width: node.outerWidth()
-      height: node.outerHeight()
-      display: node.css('display')
-      isFixed: node.hasClass('fixed')
+  unless data.fixed
+    node.placeholder = placeholder(node, data)
 
-    unless node.isFixed
-      node.placeholder = placeholder(node, data)
+  unless stack[data.group]
+    # TODO: reuse another stack for initial offsets
+    stack[data.group] = stack.all or 0
 
-    unless currentState.stack[data.group]
-      # TODO: reuse another stack for initial offsets
-      currentState.stack[data.group] = currentState.stack.all or 0
+  node.offset_top = stack[data.group]
 
-    node.offset_top = currentState.stack[data.group]
+  stack[data.group] += node.height
 
-    currentState.stack[data.group] += node.height
+  stickies.push {
+    node
 
-    currentState.stickies.push {
-      node
+    parent:
+      el: parent
+      offset: parent.offset()
+      height: parent.outerHeight()
+  }
 
-      parent:
-        el: parent
-        offset: parent.offset()
-        height: parent.outerHeight()
-    }
-
-onScroll = ->
+calculate_all_stickes = ->
   scrollTop = win.scrollTop()
 
-  currentState.stickies.forEach (sticky) ->
-    return if sticky.node.isFixed
+  stickies.forEach (sticky) ->
+    return if sticky.node.data.fixed
 
     if scrollTop <= (sticky.node.offset.top - sticky.node.offset_top)
       if sticky.node.el.hasClass('stuck')
@@ -94,6 +94,10 @@ onScroll = ->
             left: sticky.node.offset.left
             top: sticky.node.offset_top
 
-win.on 'scroll', onScroll
+win.on 'touchmove', calculate_all_stickes
+win.on 'scroll', calculate_all_stickes
 
-init_stickies()
+$.fn.velcro = (params = {}) ->
+  @each ->
+    initialize_sticky $(this), params
+    calculate_all_stickes()

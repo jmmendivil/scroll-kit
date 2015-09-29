@@ -16,39 +16,36 @@ body {
   }
 
   .content {
-    position: relative;
     border: 1px solid blue;
   }
 }
 
+.floated {
+  float: right;
+  height: 400px;
+  background: gray;
+  position: relative;
+}
+
+.fixed {
+  position: fixed;
+  height: 40px;
+  width: 100%;
+  z-index: 3;
+  top: 0;
+}
+
 .is-sticky {
-  z-index: 1;
+  // z-index: 1;
   background: silver;
-
-  &.floated {
-    float: right;
-    height: 400px;
-  }
-
-  &.fixed {
-    position: fixed;
-    height: 40px;
-    width: 100%;
-    z-index: 2;
-    top: 0;
-  }
 
   &.stuck {
     background: pink;
-    z-index: 2;
+    // z-index: 1;
 
     &.bottom {
       background: purple;
-      z-index: 1;
-    }
-
-    &.bottom.floated {
-      right: 0;
+      // z-index: 1;
     }
   }
 }
