@@ -11,22 +11,13 @@ debounce = (fn, n) ->
     fn.t = setTimeout fn, n
 
 placeholder = (node, params) ->
-  css =
-    cssFloat: node.el.css('float')
-    cssDisplay: node.el.css('display')
-    cssPosition: node.el.css('position')
-
   fixed =
     width: node.width
     height: node.height
-    float: css.cssFloat
-    position: css.cssPosition
+    float: node.el.css('float')
+    position: node.el.css('position')
 
-  el = $('<div/>').css(fixed)
-    .css('display', 'none')
-    .insertBefore(node.el)
-
-  { el, css }
+  $('<div/>').css(fixed).css('display', 'none').insertBefore(node.el)
 
 init_stickies = ->
   $('.is-sticky').each ->
@@ -44,6 +35,7 @@ init_stickies = ->
       position: node.position()
       width: node.outerWidth()
       height: node.outerHeight()
+      display: node.css('display')
       isFixed: node.hasClass('fixed')
 
     unless node.isFixed
@@ -53,7 +45,7 @@ init_stickies = ->
       # TODO: reuse another stack for initial offsets
       currentState.stack[data.group] = currentState.stack.all or 0
 
-    node.offset.fixed = currentState.stack[data.group]
+    node.offset_top = currentState.stack[data.group]
 
     currentState.stack[data.group] += node.height
 
@@ -66,30 +58,30 @@ init_stickies = ->
         height: parent.outerHeight()
     }
 
-lastScroll = -1
-
 onScroll = ->
   scrollTop = win.scrollTop()
 
   currentState.stickies.forEach (sticky) ->
     return if sticky.node.isFixed
 
-    if scrollTop <= (sticky.node.offset.top - sticky.node.offset.fixed)
+    if scrollTop <= (sticky.node.offset.top - sticky.node.offset_top)
       if sticky.node.el.hasClass('stuck')
-        sticky.node.placeholder.el.hide() if sticky.node.placeholder
+        if sticky.node.placeholder
+          sticky.node.placeholder.css('display', 'none')
         sticky.node.el.removeClass('stuck').css position: 'static'
-        # TODO: how to reset it dimensions?
     else
       unless sticky.node.el.hasClass('stuck')
-        sticky.node.placeholder.el.show() if sticky.node.placeholder
+        if sticky.node.placeholder
+          sticky.node.placeholder.css('display', sticky.node.display)
+
         sticky.node.el.addClass('stuck').css
           position: 'fixed'
           width: sticky.node.width
           height: sticky.node.height
           left: sticky.node.offset.left
-          top: sticky.node.offset.fixed
+          top: sticky.node.offset_top
 
-      offsetBottom = scrollTop + sticky.node.height + sticky.node.offset.fixed
+      offsetBottom = scrollTop + sticky.node.height + sticky.node.offset_top
 
       if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
         unless sticky.node.el.hasClass('bottom')
@@ -103,7 +95,7 @@ onScroll = ->
           sticky.node.el.removeClass('bottom').css
             position: 'fixed'
             left: sticky.node.offset.left
-            top: sticky.node.offset.fixed
+            top: sticky.node.offset_top
 
 win.on 'scroll', onScroll
 
