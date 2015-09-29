@@ -25,7 +25,6 @@ update_stickies = ->
     data.group = data.group or '_default'
 
     parent = node.parent()
-    #parentNext = $('.dummy')
 
     node =
       el: node
@@ -44,16 +43,12 @@ update_stickies = ->
           width: node.width
           height: node.height
           float: node.el.css('float')
-          #display: node.el.css('display')
-          #position: node.el.css('position')
 
-    unless _.all.offsets[data.group]?
-      _.all.offsets[data.group] = 0
+    _.all.offsets[data.group] = 0 unless _.all.offsets[data.group]?
 
-    unless node.data.offset_top
-      node.data.offset_top = _.all.offsets[data.group]
+    node.data.offset_top = _.all.offsets[data.group]
 
-    _.all.offsets[data.group] += node.data.offset_top or node.height
+    _.all.offsets[data.group] += node.height
 
     _.all.stickies.push {
       node
@@ -72,23 +67,20 @@ stuck = ->
   _.all.stickies.forEach (sticky) ->
     return if sticky.node.isFixed
 
-    offsetTop = scrollTop + sticky.parent.offset.top
-    offsetBottom = scrollTop + sticky.node.height + sticky.node.data.offset_top
-
-    if offsetTop <= sticky.node.offset.top
+    if scrollTop <= (sticky.node.offset.top - sticky.node.data.offset_top)
       if sticky.node.el.hasClass('stuck')
         sticky.node.placeholder.hide()
         sticky.node.el.removeClass('stuck').css position: 'static'
         # TODO: how to reset it dimensions?
     else
+      offsetBottom = scrollTop + sticky.node.height + sticky.node.data.offset_top
+
       if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
-      #if offsetBottom >= sticky.parentNext.offset.top
         unless sticky.node.el.hasClass('bottom')
           sticky.node.el.addClass('bottom').css
             position: 'absolute'
             left: 'auto'
             top: 'auto'
-            #top: sticky.parentNext.offset.top - sticky.node.height - sticky.node.data.offset_top
       else
         if sticky.node.el.hasClass('bottom')
           sticky.node.el.removeClass('bottom').css
