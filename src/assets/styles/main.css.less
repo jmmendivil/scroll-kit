@@ -15,6 +15,10 @@ body {
     margin: 0 auto;
   }
 
+  .content {
+    position: relative;
+  }
+
   .bottom {
     border: 1px solid blue;
   }
@@ -34,10 +38,17 @@ body {
     position: fixed;
     height: 40px;
     width: 100%;
+    z-index: 1;
     top: 0;
   }
 
   &.stuck {
     border: 1px solid red;
+
+    &.bottom {
+      border: 1px solid green;
+      right: 0;
+      bottom: 0;
+    }
   }
 }

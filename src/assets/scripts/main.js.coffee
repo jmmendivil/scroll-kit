@@ -23,10 +23,9 @@ update_stickies = ->
 
     data = node.data('sticky') or {}
     data.group = data.group or '_default'
-    data.className = data.className or  'stuck'
 
     parent = node.parent()
-    parentNext = parent.next()
+    #parentNext = parent.next()
 
     node =
       el: node
@@ -62,10 +61,11 @@ update_stickies = ->
       parent:
         el: parent
         offset: parent.offset()
+        height: parent.outerHeight()
 
-      parentNext:
-        el: parentNext
-        offset: parentNext.offset()
+      #parentNext:
+      #  el: parentNext
+      #  offset: parentNext.offset()
     }
 
 lastScroll = -1
@@ -77,6 +77,7 @@ stuck = ->
     return if sticky.node.isFixed
 
     offsetTop = scrollTop + sticky.parent.offset.top
+    offsetBottom = scrollTop + sticky.node.height + sticky.node.data.offset_top
 
     if offsetTop <= sticky.node.offset.top
       if sticky.node.el.hasClass('stuck')
@@ -84,6 +85,19 @@ stuck = ->
         sticky.node.el.removeClass('stuck').css position: 'static'
         # TODO: how to reset it dimensions?
     else
+      if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
+        unless sticky.node.el.hasClass('bottom')
+          sticky.node.el.addClass('bottom').css
+            position: 'absolute'
+            left: 'auto'
+            top: 'auto'
+      else
+        if sticky.node.el.hasClass('bottom')
+          sticky.node.el.removeClass('bottom').css
+            position: 'fixed'
+            left: sticky.node.offset.left
+            top: sticky.node.data.offset_top
+
       unless sticky.node.el.hasClass('stuck')
         sticky.node.placeholder.show()
         sticky.node.el.addClass('stuck').css
