@@ -1,28 +1,39 @@
 win = $(window)
 doc = $(document.documentElement)
 
-_ =
-  all:
-    offsets: {}
-    stickies: []
-  win:
-    height: win.outerHeight()
-  doc:
-    height: doc.outerHeight()
+currentState =
+  stack: {}
+  stickies: []
 
-debounce = (fn) ->
+debounce = (fn, n) ->
   ->
     clearTimeout fn.t
-    fn.t = setTimeout fn, 300
+    fn.t = setTimeout fn, n
 
-update_stickies = ->
-  _.all.stickies = []
+placeholder = (node, params) ->
+  css =
+    position: node.position()
+    cssFloat: node.css('float')
+    cssDisplay: node.css('display')
+    cssPosition: node.css('position')
 
+  fixed =
+    float: css.cssFloat
+    position: css.cssposition
+    height: node.outerHeight()
+
+  el = $('<div/>').css(fixed)
+    .css('display', 'none')
+    .insertBefore(node)
+
+  { el, css }
+
+init_stickies = ->
   $('.is-sticky').each ->
     node = $(@)
 
     data = node.data('sticky') or {}
-    data.group = data.group or '_default'
+    data.group or= 'all'
 
     parent = node.parent()
 
@@ -32,26 +43,20 @@ update_stickies = ->
       offset: node.offset()
       width: node.outerWidth()
       height: node.outerHeight()
-      isFixed: isFixed = node.hasClass('fixed')
-      isInline: isInline = node.hasClass('inline')
+      isFixed: node.hasClass('fixed')
 
-    unless isFixed
-      node.placeholder = $('<div/>')
-        .insertBefore(node.el)
-        .hide()
-        .css
-          width: node.width
-          height: node.height
-          float: node.el.css('float')
+    unless node.isFixed
+      node.placeholder = placeholder(node.el, data)
 
-    # TODO: consider starting the stack from another stack if desired, otherwise use zero
-    _.all.offsets[data.group] = (_.all.offsets._default or 0) unless _.all.offsets[data.group]?
+    unless currentState.stack[data.group]
+      # TODO: reuse another stack for initial offsets
+      currentState.stack[data.group] = currentState.stack.all or 0
 
-    node.data.offset_top = _.all.offsets[data.group]
+    node.offset.fixed = currentState.stack[data.group]
 
-    _.all.offsets[data.group] += node.height
+    currentState.stack[data.group] += node.height
 
-    _.all.stickies.push {
+    currentState.stickies.push {
       node
 
       parent:
@@ -62,46 +67,44 @@ update_stickies = ->
 
 lastScroll = -1
 
-stuck = ->
+onScroll = ->
   scrollTop = win.scrollTop()
 
-  _.all.stickies.forEach (sticky) ->
+  currentState.stickies.forEach (sticky) ->
     return if sticky.node.isFixed
 
-    if scrollTop <= (sticky.node.offset.top - sticky.node.data.offset_top)
+    if scrollTop <= (sticky.node.offset.top - sticky.node.offset.fixed)
       if sticky.node.el.hasClass('stuck')
-        sticky.node.placeholder.hide()
+        sticky.node.placeholder.el.hide() if sticky.node.placeholder
         sticky.node.el.removeClass('stuck').css position: 'static'
         # TODO: how to reset it dimensions?
     else
-      offsetBottom = scrollTop + sticky.node.height + sticky.node.data.offset_top
+      #offsetBottom = scrollTop + sticky.node.height + sticky.node.offset.top
 
-      if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
-        unless sticky.node.el.hasClass('bottom')
-          sticky.node.el.addClass('bottom').css
-            position: 'absolute'
-            left: 'auto'
-            top: 'auto'
-      else
-        if sticky.node.el.hasClass('bottom')
-          sticky.node.el.removeClass('bottom').css
-            position: 'fixed'
-            left: sticky.node.offset.left
-            top: sticky.node.data.offset_top
+      #console.log offsetBottom, (sticky.parent.offset.top + sticky.parent.height)
+
+      # if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
+      #   unless sticky.node.el.hasClass('bottom')
+      #     sticky.node.el.addClass('bottom').css
+      #       position: 'absolute'
+      #       left: 'auto'
+      #       top: 'auto'
+      # else
+      #   if sticky.node.el.hasClass('bottom')
+      #     sticky.node.el.removeClass('bottom').css
+      #       position: 'fixed'
+      #       left: sticky.node.offset.left
+      #       top: sticky.node.offset.fixed
 
       unless sticky.node.el.hasClass('stuck')
-        sticky.node.placeholder.show()
+        sticky.node.placeholder.el.show() if sticky.node.placeholder
         sticky.node.el.addClass('stuck').css
           position: 'fixed'
           width: sticky.node.width
           height: sticky.node.height
           left: sticky.node.offset.left
-          top: sticky.node.data.offset_top
+          top: sticky.node.offset.fixed
 
-  update_stickies() if lastScroll is -1
+win.on 'scroll', onScroll
 
-  lastScroll = scrollTop
-
-win.on 'scroll', stuck
-
-stuck()
+init_stickies()
