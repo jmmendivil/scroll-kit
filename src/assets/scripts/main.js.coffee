@@ -44,7 +44,8 @@ update_stickies = ->
           height: node.height
           float: node.el.css('float')
 
-    _.all.offsets[data.group] = 0 unless _.all.offsets[data.group]?
+    # TODO: consider starting the stack from another stack if desired, otherwise use zero
+    _.all.offsets[data.group] = (_.all.offsets._default or 0) unless _.all.offsets[data.group]?
 
     node.data.offset_top = _.all.offsets[data.group]
 

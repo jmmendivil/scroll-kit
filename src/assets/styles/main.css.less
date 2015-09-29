@@ -45,8 +45,21 @@ body {
     &.bottom {
       background: purple;
       z-index: 1;
-      right: 0;
       bottom: 0;
     }
+
+    &.bottom.floated {
+      right: 0;
+    }
+  }
+}
+
+.row {
+  display: table;
+
+  .cell {
+    display: table-cell;
+    vertical-align: top;
+    position: relative;
   }
 }
