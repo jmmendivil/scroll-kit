@@ -4,11 +4,6 @@ currentState =
   stack: {}
   stickies: []
 
-debounce = (fn, n) ->
-  ->
-    clearTimeout fn.t
-    fn.t = setTimeout fn, n
-
 placeholder = (node, params) ->
   fixed =
     width: node.width
@@ -25,7 +20,10 @@ init_stickies = ->
     data = node.data('sticky') or {}
     data.group or= 'all'
 
-    parent = node.parent()
+    parent = if data.parent
+      $(data.parent)
+    else
+      node.parent()
 
     node =
       el: node
