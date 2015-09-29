@@ -10,7 +10,7 @@ body {
 .wrapper {
   margin-top: 40px;
 
-  .content, .bottom {
+  .content, .footer {
     width: 400px;
     margin: 0 auto;
   }
@@ -18,35 +18,33 @@ body {
   .content {
     position: relative;
   }
-
-  .bottom {
-    border: 1px solid blue;
-  }
 }
 
 .is-sticky {
-  border: 1px solid gray;
+  z-index: 1;
+  background: silver;
 
   &.floated {
     float: right;
     height: 400px;
-    background: silver;
+    background: gray;
   }
 
   &.fixed {
-    background: silver;
     position: fixed;
     height: 40px;
     width: 100%;
-    z-index: 1;
+    z-index: 2;
     top: 0;
   }
 
   &.stuck {
-    border: 1px solid red;
+    background: pink;
+    z-index: 2;
 
     &.bottom {
-      border: 1px solid green;
+      background: purple;
+      z-index: 1;
       right: 0;
       bottom: 0;
     }

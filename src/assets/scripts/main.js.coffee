@@ -25,7 +25,7 @@ update_stickies = ->
     data.group = data.group or '_default'
 
     parent = node.parent()
-    #parentNext = parent.next()
+    #parentNext = $('.dummy')
 
     node =
       el: node
@@ -62,10 +62,6 @@ update_stickies = ->
         el: parent
         offset: parent.offset()
         height: parent.outerHeight()
-
-      #parentNext:
-      #  el: parentNext
-      #  offset: parentNext.offset()
     }
 
 lastScroll = -1
@@ -86,11 +82,13 @@ stuck = ->
         # TODO: how to reset it dimensions?
     else
       if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
+      #if offsetBottom >= sticky.parentNext.offset.top
         unless sticky.node.el.hasClass('bottom')
           sticky.node.el.addClass('bottom').css
             position: 'absolute'
             left: 'auto'
             top: 'auto'
+            #top: sticky.parentNext.offset.top - sticky.node.height - sticky.node.data.offset_top
       else
         if sticky.node.el.hasClass('bottom')
           sticky.node.el.removeClass('bottom').css
