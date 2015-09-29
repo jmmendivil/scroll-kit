@@ -17,14 +17,22 @@ body {
 
   .content {
     border: 1px solid blue;
+    position: relative;
+    overflow: auto;
   }
 }
 
 .floated {
   float: right;
-  height: 400px;
+  width: 200px;
+  min-height: 400px;
   background: gray;
   position: relative;
+}
+
+.scroll {
+  max-height: 600px;
+  overflow: auto;
 }
 
 .fixed {

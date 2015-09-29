@@ -43,59 +43,62 @@ initialize_sticky = (node, params = {}) ->
     stack[data.group] = stack.all or 0
 
   node.offset_top = stack[data.group]
+  node.passing_top = node.offset.top - node.offset_top
+  node.passing_height = node.height + node.offset_top
+  node.passing_bottom = parent.offset().top + parent.outerHeight()
 
   stack[data.group] += node.height
 
-  stickies.push {
-    node
+  stickies.push node
 
-    parent:
-      el: parent
-      offset: parent.offset()
-      height: parent.outerHeight()
-  }
+update_all_stickies = ->
+  console.log 'REFRESH'
+
+destroy_all_stickies = ->
+  console.log 'ELIMINATE'
 
 calculate_all_stickes = ->
   scrollTop = win.scrollTop()
 
   stickies.forEach (sticky) ->
-    return if sticky.node.data.fixed
+    return if sticky.data.fixed
 
-    if scrollTop <= (sticky.node.offset.top - sticky.node.offset_top)
-      if sticky.node.el.hasClass('stuck')
-        if sticky.node.placeholder
-          sticky.node.placeholder.css('display', 'none')
-        sticky.node.el.removeClass('stuck').css position: 'static'
+    if scrollTop <= sticky.passing_top
+      if sticky.el.hasClass('stuck')
+        if sticky.placeholder
+          sticky.placeholder.css('display', 'none')
+        sticky.el.removeClass('stuck').css position: 'static'
     else
-      unless sticky.node.el.hasClass('stuck')
-        if sticky.node.placeholder
-          sticky.node.placeholder.css('display', sticky.node.display)
+      unless sticky.el.hasClass('stuck')
+        if sticky.placeholder
+          sticky.placeholder.css('display', sticky.display)
 
-        sticky.node.el.addClass('stuck').css
+        sticky.el.addClass('stuck').css
           position: 'fixed'
-          width: sticky.node.width
-          height: sticky.node.height
-          left: sticky.node.offset.left
-          top: sticky.node.offset_top
+          width: sticky.width
+          height: sticky.height
+          left: sticky.offset.left
+          top: sticky.offset_top
 
-      offsetBottom = scrollTop + sticky.node.height + sticky.node.offset_top
-
-      if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
-        unless sticky.node.el.hasClass('bottom')
-          sticky.node.el.addClass('bottom').css
+      if (scrollTop + sticky.passing_height) >= sticky.passing_bottom
+        unless sticky.el.hasClass('bottom')
+          sticky.el.addClass('bottom').css
             position: 'absolute'
-            left: sticky.node.position.left
+            left: sticky.position.left
             bottom: 0
             top: 'auto'
       else
-        if sticky.node.el.hasClass('bottom')
-          sticky.node.el.removeClass('bottom').css
+        if sticky.el.hasClass('bottom')
+          sticky.el.removeClass('bottom').css
             position: 'fixed'
-            left: sticky.node.offset.left
-            top: sticky.node.offset_top
+            left: sticky.offset.left
+            top: sticky.offset_top
 
 win.on 'touchmove', calculate_all_stickes
 win.on 'scroll', calculate_all_stickes
+
+window._destroy = destroy_all_stickies
+window._update = update_all_stickies
 
 $.fn.velcro = (params = {}) ->
   @each ->
