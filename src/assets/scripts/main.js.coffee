@@ -12,19 +12,20 @@ debounce = (fn, n) ->
 
 placeholder = (node, params) ->
   css =
-    position: node.position()
-    cssFloat: node.css('float')
-    cssDisplay: node.css('display')
-    cssPosition: node.css('position')
+    position: node.el.position()
+    cssFloat: node.el.css('float')
+    cssDisplay: node.el.css('display')
+    cssPosition: node.el.css('position')
 
   fixed =
+    width: node.width
+    height: node.height
     float: css.cssFloat
-    position: css.cssposition
-    height: node.outerHeight()
+    position: css.cssPosition
 
   el = $('<div/>').css(fixed)
     .css('display', 'none')
-    .insertBefore(node)
+    .insertBefore(node.el)
 
   { el, css }
 
@@ -46,7 +47,7 @@ init_stickies = ->
       isFixed: node.hasClass('fixed')
 
     unless node.isFixed
-      node.placeholder = placeholder(node.el, data)
+      node.placeholder = placeholder(node, data)
 
     unless currentState.stack[data.group]
       # TODO: reuse another stack for initial offsets
@@ -79,22 +80,20 @@ onScroll = ->
         sticky.node.el.removeClass('stuck').css position: 'static'
         # TODO: how to reset it dimensions?
     else
-      #offsetBottom = scrollTop + sticky.node.height + sticky.node.offset.top
+      offsetBottom = scrollTop + sticky.node.height + sticky.node.offset.fixed
 
-      #console.log offsetBottom, (sticky.parent.offset.top + sticky.parent.height)
-
-      # if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
-      #   unless sticky.node.el.hasClass('bottom')
-      #     sticky.node.el.addClass('bottom').css
-      #       position: 'absolute'
-      #       left: 'auto'
-      #       top: 'auto'
-      # else
-      #   if sticky.node.el.hasClass('bottom')
-      #     sticky.node.el.removeClass('bottom').css
-      #       position: 'fixed'
-      #       left: sticky.node.offset.left
-      #       top: sticky.node.offset.fixed
+      if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
+        unless sticky.node.el.hasClass('bottom')
+          sticky.node.el.addClass('bottom').css
+            position: 'absolute'
+            left: 'auto'
+            top: 'auto'
+      else
+        if sticky.node.el.hasClass('bottom')
+          sticky.node.el.removeClass('bottom').css
+            position: 'fixed'
+            left: sticky.node.offset.left
+            top: sticky.node.offset.fixed
 
       unless sticky.node.el.hasClass('stuck')
         sticky.node.placeholder.el.show() if sticky.node.placeholder
