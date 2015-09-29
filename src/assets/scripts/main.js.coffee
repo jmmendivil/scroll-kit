@@ -80,6 +80,15 @@ onScroll = ->
         sticky.node.el.removeClass('stuck').css position: 'static'
         # TODO: how to reset it dimensions?
     else
+      unless sticky.node.el.hasClass('stuck')
+        sticky.node.placeholder.el.show() if sticky.node.placeholder
+        sticky.node.el.addClass('stuck').css
+          position: 'fixed'
+          width: sticky.node.width
+          height: sticky.node.height
+          left: sticky.node.offset.left
+          top: sticky.node.offset.fixed
+
       offsetBottom = scrollTop + sticky.node.height + sticky.node.offset.fixed
 
       if offsetBottom >= (sticky.parent.offset.top + sticky.parent.height)
@@ -95,15 +104,6 @@ onScroll = ->
             position: 'fixed'
             left: sticky.node.offset.left
             top: sticky.node.offset.fixed
-
-      unless sticky.node.el.hasClass('stuck')
-        sticky.node.placeholder.el.show() if sticky.node.placeholder
-        sticky.node.el.addClass('stuck').css
-          position: 'fixed'
-          width: sticky.node.width
-          height: sticky.node.height
-          left: sticky.node.offset.left
-          top: sticky.node.offset.fixed
 
 win.on 'scroll', onScroll
 
