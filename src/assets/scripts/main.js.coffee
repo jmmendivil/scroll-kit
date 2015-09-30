@@ -57,7 +57,10 @@ initialize_sticky = (node, params = {}) ->
     node.placeholder = placeholder(node, data)
 
   if data.fit and (node.height >= height)
+    fixed_bottom = node.offset.top + node.height
+    node.fixed_bottom = node.passing_bottom - fixed_bottom
     node.height = height - node.offset_top
+    node.passing_bottom = fixed_bottom
     node.passing_height = height
 
   stickies.push node
@@ -97,7 +100,7 @@ calculate_all_stickes = ->
             sticky.el.addClass('bottom').css
               position: 'absolute'
               left: sticky.position.left
-              bottom: 0
+              bottom: sticky.fixed_bottom or 0
               top: 'auto'
               height: sticky.height if sticky.data.fit
         else
