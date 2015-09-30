@@ -10,7 +10,7 @@ html
     title Stickys FTW! D:
   body
     .wrapper
-      .is-sticky.fixed(data-sticky={fixed:true}) TOP HEADING / MENU
+      .is-sticky.fixed TOP HEADING / MENU
 
       p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
 
@@ -41,12 +41,28 @@ html
         +repeat(6)
           p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
 
-        .floated
+        .floated(style='height:260px')
           p A SIDEBAR / PLAYLIST
           .is-sticky(data-sticky={group:'inner'}) FUAAAAA
 
-        .is-sticky.floated(data-sticky={fit:true})
+        button.is-sticky SHALL NOT PASS!
+
+        .is-sticky.floated
           p ILL BECOME A LARGE PLAYLIST
+          +repeat(20)
+            p AND I DONT WANT TO BE STUCK
+
+        p.floated I AM A PARAGRAPH
+        .is-sticky.floated I AM A PARAGRAPH?
+        p.floated I AM A PARAGRAPH
+
+        .is-sticky.floated
+          p ILL BECOME A LARGE PLAYLIST
+          +repeat(5)
+            p AND I DONT WANT TO BE STUCK
+
+          //- .is-sticky OOOOOOOOOOOOOO D:
+
           +repeat(20)
             p AND I DONT WANT TO BE STUCK
 
@@ -61,10 +77,18 @@ html
         +repeat(3)
           p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
 
-        button.dummy SHALL NOT PASS!
-
         +repeat(4)
           p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+
+      +repeat(4)
+        p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+
+      .is-sticky ILL BECOME A STICKY BRO?
+
+      +repeat(4)
+        p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+
+      .is-sticky ILL BECOME A STICKY BRO?
 
       .footer
         +repeat(7)

@@ -36,32 +36,41 @@ initialize_sticky = (node, params = {}) ->
     width: node.outerWidth(true)
     height: node.outerHeight(true)
     display: node.css('display')
+    isFloat: node.css('float') isnt 'none'
+    isFixed: node.css('position') is 'fixed'
 
   unless stack[data.group]
     # TODO: reuse another stack for initial offsets
     stack[data.group] = stack.all or 0
 
+  node.offset_top = stack[data.group]
+
+  # may be skip them while computing offsets | stack | bottom
+  stack[data.group] += node.height unless node.isFloat
+
+  return if node.isFixed
+
   parent_top = parent.offset().top
   parent_height = parent.outerHeight(true)
 
-  node.offset_top = stack[data.group]
   node.passing_top = node.offset.top - node.offset_top
   node.passing_height = node.height + node.offset_top
   node.passing_bottom = parent_top + parent_height
 
-  data.fixed = true if node.height >= parent_height
+  node.placeholder = placeholder(node, data)
 
-  stack[data.group] += node.height
+  # when bottoming the stack's offset should be subtracted
+  # otherwise restore it initial height for
 
-  unless data.fixed
-    node.placeholder = placeholder(node, data)
-
-  if data.fit and (node.height >= height)
+  if node.isFloat
+    # all floated stickies should fit to the viewport
     fixed_bottom = node.offset.top + node.height
     node.fixed_bottom = node.passing_bottom - fixed_bottom
-    node.height = height - node.offset_top
     node.passing_bottom = fixed_bottom
-    node.passing_height = height
+
+    if node.height >= height
+      node.height = height - node.offset_top
+      node.passing_height = height
 
   stickies.push node
 
@@ -69,15 +78,13 @@ calculate_all_stickes = ->
   scrollTop = win.scrollTop()
 
   stickies.forEach (sticky) ->
-    return if sticky.data.fixed
-
     if scrollTop <= sticky.passing_top
       if sticky.el.hasClass('stuck')
         if sticky.placeholder
           sticky.placeholder.css('display', 'none')
         sticky.el.removeClass('stuck bottom').css position: 'static'
 
-      if sticky.data.fit
+      if sticky.isFloat
         fitted_top = height + scrollTop - sticky.offset_top
 
         if fitted_top >= sticky.passing_top
@@ -90,10 +97,10 @@ calculate_all_stickes = ->
         sticky.el.addClass('stuck').css
           position: 'fixed'
           width: sticky.width
-          height: if sticky.data.fit then 'auto' else sticky.height
+          height: if sticky.isFloat then 'auto' else sticky.height
           left: sticky.offset.left
           top: sticky.offset_top
-          bottom: 0 if sticky.data.fit
+          bottom: 0 if sticky.isFloat
       else
         if (scrollTop + sticky.passing_height) >= sticky.passing_bottom
           unless sticky.el.hasClass('bottom')
@@ -102,7 +109,7 @@ calculate_all_stickes = ->
               left: sticky.position.left
               bottom: sticky.fixed_bottom or 0
               top: 'auto'
-              height: sticky.height if sticky.data.fit
+              height: sticky.height if sticky.isFloat
         else
           if sticky.el.hasClass('bottom')
             sticky.el.removeClass('bottom').css
