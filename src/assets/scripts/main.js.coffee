@@ -56,9 +56,8 @@ initialize_sticky = (node, params = {}) ->
   unless data.fixed
     node.placeholder = placeholder(node, data)
 
-  if node.data.stretch and (node.height >= height)
+  if data.fit and (node.height >= height)
     node.height = height - node.offset_top
-    node.el.css 'height', node.height
     node.passing_height = height
 
   stickies.push node
@@ -80,6 +79,12 @@ calculate_all_stickes = ->
         if sticky.placeholder
           sticky.placeholder.css('display', 'none')
         sticky.el.removeClass('stuck bottom').css position: 'static'
+
+      if sticky.data.fit
+        fitted_top = height + scrollTop - sticky.offset_top
+
+        if fitted_top >= sticky.passing_top
+          sticky.el.css 'height', fitted_top - sticky.passing_top
     else
       unless sticky.el.hasClass('stuck')
         if sticky.placeholder
@@ -88,9 +93,10 @@ calculate_all_stickes = ->
         sticky.el.addClass('stuck').css
           position: 'fixed'
           width: sticky.width
-          height: sticky.height
+          height: if sticky.data.fit then 'auto' else sticky.height
           left: sticky.offset.left
           top: sticky.offset_top
+          bottom: 0 if sticky.data.fit
       else
         if (scrollTop + sticky.passing_height) >= sticky.passing_bottom
           unless sticky.el.hasClass('bottom')
@@ -99,6 +105,7 @@ calculate_all_stickes = ->
               left: sticky.position.left
               bottom: 0
               top: 'auto'
+              height: sticky.height if sticky.data.fit
         else
           if sticky.el.hasClass('bottom')
             sticky.el.removeClass('bottom').css
