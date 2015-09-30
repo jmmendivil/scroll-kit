@@ -4,11 +4,6 @@ height = win.height()
 stack = {}
 stickies = []
 
-debounce = (fn, n) ->
-  ->
-    clearTimeout fn.t
-    fn.t = setTimeout fn, n
-
 placeholder = (node, params) ->
   fixed =
     width: node.width
@@ -44,9 +39,10 @@ initialize_sticky = (node, params = {}) ->
     stack[data.group] = stack.all or 0
 
   node.offset_top = stack[data.group]
+  node.offset_height = node.height
 
   # may be skip them while computing offsets | stack | bottom
-  stack[data.group] += node.height unless node.isFloat
+  stack[data.group] += node.offset_height unless node.isFloat
 
   return if node.isFixed
 
@@ -54,7 +50,7 @@ initialize_sticky = (node, params = {}) ->
   parent_height = parent.outerHeight(true)
 
   node.passing_top = node.offset.top - node.offset_top
-  node.passing_height = node.height + node.offset_top
+  node.passing_height = node.offset_height + node.offset_top
   node.passing_bottom = parent_top + parent_height
 
   node.placeholder = placeholder(node, data)
@@ -64,7 +60,7 @@ initialize_sticky = (node, params = {}) ->
 
   if node.isFloat
     # all floated stickies should fit to the viewport
-    fixed_bottom = node.offset.top + node.height
+    fixed_bottom = node.offset.top + node.offset_height
     node.fixed_bottom = node.passing_bottom - fixed_bottom
     node.passing_bottom = fixed_bottom
 
