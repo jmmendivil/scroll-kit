@@ -56,6 +56,11 @@ initialize_sticky = (node, params = {}) ->
   unless data.fixed
     node.placeholder = placeholder(node, data)
 
+  if node.data.stretch and (node.height >= height)
+    node.height = height - node.offset_top
+    node.el.css 'height', node.height
+    node.passing_height = height
+
   stickies.push node
 
 update_all_stickies = ->
@@ -74,7 +79,7 @@ calculate_all_stickes = ->
       if sticky.el.hasClass('stuck')
         if sticky.placeholder
           sticky.placeholder.css('display', 'none')
-        sticky.el.removeClass('stuck').css position: 'static'
+        sticky.el.removeClass('stuck bottom').css position: 'static'
     else
       unless sticky.el.hasClass('stuck')
         if sticky.placeholder
@@ -86,20 +91,20 @@ calculate_all_stickes = ->
           height: sticky.height
           left: sticky.offset.left
           top: sticky.offset_top
-
-      if (scrollTop + sticky.passing_height) >= sticky.passing_bottom
-        unless sticky.el.hasClass('bottom')
-          sticky.el.addClass('bottom').css
-            position: 'absolute'
-            left: sticky.position.left
-            bottom: 0
-            top: 'auto'
       else
-        if sticky.el.hasClass('bottom')
-          sticky.el.removeClass('bottom').css
-            position: 'fixed'
-            left: sticky.offset.left
-            top: sticky.offset_top
+        if (scrollTop + sticky.passing_height) >= sticky.passing_bottom
+          unless sticky.el.hasClass('bottom')
+            sticky.el.addClass('bottom').css
+              position: 'absolute'
+              left: sticky.position.left
+              bottom: 0
+              top: 'auto'
+        else
+          if sticky.el.hasClass('bottom')
+            sticky.el.removeClass('bottom').css
+              position: 'fixed'
+              left: sticky.offset.left
+              top: sticky.offset_top
 
 win.on 'touchmove', calculate_all_stickes
 win.on 'scroll', calculate_all_stickes
