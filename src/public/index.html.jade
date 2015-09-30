@@ -43,9 +43,9 @@ html
 
         .floated(style='height:260px')
           p A SIDEBAR / PLAYLIST
-          .is-sticky(data-sticky={xgroup:'inner'}) FUAAAAA
+          .is-sticky(data-sticky={group:'inner'}) FUAAAAA
 
-        .is-sticky.floated
+        .is-sticky.floated(data-sticky={group:'outer'})
           p ILL BECOME A LARGE PLAYLIST
           +repeat(20)
             p AND I DONT WANT TO BE STUCK
@@ -75,7 +75,7 @@ html
         +repeat(3)
           p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
 
-        button.is-sticky(data-sticky={xgroup:'outer'}) SHALL NOT PASS!
+        button.is-sticky(data-sticky={group:'outer'}) SHALL NOT PASS!
 
         +repeat(4)
           p Donec id elit non mi porta gravida at eget metus. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Donec ullamcorper nulla non metus auctor fringilla. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
