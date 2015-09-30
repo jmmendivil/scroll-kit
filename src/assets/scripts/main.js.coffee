@@ -62,12 +62,6 @@ initialize_sticky = (node, params = {}) ->
 
   stickies.push node
 
-update_all_stickies = ->
-  console.log 'REFRESH'
-
-destroy_all_stickies = ->
-  console.log 'ELIMINATE'
-
 calculate_all_stickes = ->
   scrollTop = win.scrollTop()
 
@@ -115,9 +109,6 @@ calculate_all_stickes = ->
 
 win.on 'touchmove', calculate_all_stickes
 win.on 'scroll', calculate_all_stickes
-
-window._destroy = destroy_all_stickies
-window._update = update_all_stickies
 
 $.fn.velcro = (params = {}) ->
   @each ->
