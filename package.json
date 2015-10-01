@@ -1,4 +1,11 @@
 {
-  "name": "estucko",
-  "version": "0.0.0"
+  "name": "jquery-velcro",
+  "version": "0.0.0",
+  "main": "dist/jquery-velcro.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/gextech/jquery-velcro.git"
+  },
+  "author": "Alvaro Cabrera <pateketrueke@gmail.com>",
+  "license": "MIT"
 }
