@@ -2,10 +2,19 @@
   "name": "jquery-velcro",
   "version": "0.0.0",
   "main": "dist/jquery-velcro.js",
+  "scripts": {
+    "dev": "./node_modules/coffee-script/bin/coffee --watch --output dist --compile src/jquery-velcro.coffee",
+    "dist": "./node_modules/coffee-script/bin/coffee --output dist --compile src/jquery-velcro.coffee",
+    "lint": "./node_modules/coffeelint/bin/coffeelint src/jquery-velcro.coffee"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@bitbucket.org/gextech/jquery-velcro.git"
   },
   "author": "Alvaro Cabrera <pateketrueke@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "coffee-script": "^1.10.0",
+    "coffeelint": "^1.12.1"
+  }
 }

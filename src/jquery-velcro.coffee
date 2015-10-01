@@ -120,4 +120,4 @@ $.velcro = (selector = '.is-velcro', params = {}) ->
   $(selector).each ->
     initialize_sticky $(this), params
 
-  setTimeout(calculate_all_stickes, 0)
+  setTimeout(calculate_all_stickes, 10)
