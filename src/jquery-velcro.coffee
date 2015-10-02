@@ -58,15 +58,21 @@ update_sticky = (node) ->
 
   return if node.isFixed
 
-  parent_top = node.parent.offset().top
+  border_top = parseInt(node.parent.css('border-top-width'), 10)
+  padding_top = parseInt(node.parent.css('padding-top'), 10)
+  padding_bottom = parseInt(node.parent.css('padding-bottom'), 10)
+
+  parent_top = node.parent.offset().top + border_top + padding_top
   parent_height = fix_outer_size(node.parent)
 
-  node.passing_top = node.offset.top - node.offset_top
+  offset_top = node.offset.top - (parseInt(node.el.css('margin-top'), 10) or 0)
+
+  node.passing_top = offset_top - node.offset_top
   node.passing_height = node.offset_height + node.offset_top
   node.passing_bottom = parent_top + parent_height
 
   if node.data.fit
-    fixed_bottom = node.offset.top + node.offset_height
+    fixed_bottom = offset_top + node.offset_height
     node.fixed_bottom = node.passing_bottom - fixed_bottom
     node.passing_bottom = fixed_bottom
 
@@ -81,7 +87,7 @@ initialize_sticky = (node, params = {}) ->
   data.group or= 'all'
 
   parent = if data.parent
-    $(data.parent)
+    node.closest(data.parent)
   else
     node.parent()
 
