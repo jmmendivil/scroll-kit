@@ -4,6 +4,36 @@ height = win.height()
 stack = {}
 stickies = []
 
+get_computed = (node) ->
+  computed = getComputedStyle node[0]
+
+  (name) ->
+    parseFloat computed.getPropertyValue(name)
+
+fix_outer_width = (node) ->
+  if getComputedStyle
+    prop = get_computed(node)
+
+    w = prop('width') + prop('margin-left') + prop('margin-right')
+
+    if prop('box-sizing') isnt 'border-box'
+      w += prop('border-left-width') + prop('border-right-width') + prop('padding-left') + prop('padding-right')
+    w
+  else
+    node.outerWidth true
+
+fix_outer_height = (node) ->
+  if getComputedStyle
+    prop = get_computed(node)
+
+    w = prop('height') + prop('margin-top') + prop('margin-bottom')
+
+    if prop('box-sizing') isnt 'border-box'
+      w += prop('border-top-width') + prop('border-bottom-width') + prop('padding-top') + prop('padding-bottom')
+    w
+  else
+    node.outerWidth true
+
 placeholder = (node) ->
   fixed =
     width: node.width
@@ -17,8 +47,8 @@ placeholder = (node) ->
 update_sticky = (node) ->
   node.offset = node.el.offset()
   node.position = node.el.position()
-  node.width = node.el.outerWidth(true)
-  node.height = node.el.outerHeight(true)
+  node.width = fix_outer_width(node.el)
+  node.height = fix_outer_height(node.el)
 
   unless stack[node.data.group]
     stack[node.data.group] = unless node.data.stack is false
@@ -38,7 +68,7 @@ update_sticky = (node) ->
   return if node.isFixed
 
   parent_top = node.parent.offset().top
-  parent_height = node.parent.outerHeight(true)
+  parent_height = fix_outer_height(node.parent)
 
   node.passing_top = node.offset.top - node.offset_top
   node.passing_height = node.offset_height + node.offset_top
