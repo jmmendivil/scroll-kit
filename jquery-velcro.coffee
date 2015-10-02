@@ -12,10 +12,16 @@ listen_to = (root) ->
     else
       win
 
+    offset_top = unless root is 'window'
+      element.offset().top
+    else
+      0
+
     stack[root] =
       el: element
       nodes: []
       offsets: {}
+      cached_top: offset_top
       cached_height: element.height()
 
     on_scroll = ->
@@ -37,7 +43,7 @@ placeholder = (node) ->
 
 update_sticky = (root, node) ->
   unless root.offsets[node.data.group]
-    root.offsets[node.data.group] = 0
+    root.offsets[node.data.group] = root.cached_top
 
   node.offset_top = root.offsets[node.data.group]
 
@@ -76,7 +82,7 @@ initialize_sticky = (node, params = {}) ->
   data = $.extend({}, params, node.data('sticky') or {})
 
   # used for isolated scroll events
-  root = listen_to(data.listen or 'window')
+  root = listen_to(data.root or 'window')
 
   # used for internal stacks
   data.group or= 'all'
