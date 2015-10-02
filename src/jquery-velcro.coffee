@@ -10,29 +10,20 @@ get_computed = (node) ->
   (name) ->
     parseFloat computed.getPropertyValue(name)
 
-fix_outer_width = (node) ->
+fix_outer_size = (node, width) ->
   if getComputedStyle
     prop = get_computed(node)
 
-    w = prop('width') + prop('margin-left') + prop('margin-right')
+    x = if width then 'left' else 'top'
+    y = if width then 'right' else 'bottom'
+
+    z = prop(if width then 'width' else 'height') + prop('margin-' + x) + prop('margin-' + y)
 
     if prop('box-sizing') isnt 'border-box'
-      w += prop('border-left-width') + prop('border-right-width') + prop('padding-left') + prop('padding-right')
-    w
+      z += prop('border-' + x + '-width') + prop('border-' + y + '-width') + prop('padding-' + x) + prop('padding-' + y)
+    z
   else
-    node.outerWidth true
-
-fix_outer_height = (node) ->
-  if getComputedStyle
-    prop = get_computed(node)
-
-    w = prop('height') + prop('margin-top') + prop('margin-bottom')
-
-    if prop('box-sizing') isnt 'border-box'
-      w += prop('border-top-width') + prop('border-bottom-width') + prop('padding-top') + prop('padding-bottom')
-    w
-  else
-    node.outerWidth true
+    node[if width then 'outerWidth' else 'outerHeight'] true
 
 placeholder = (node) ->
   fixed =
@@ -47,8 +38,8 @@ placeholder = (node) ->
 update_sticky = (node) ->
   node.offset = node.el.offset()
   node.position = node.el.position()
-  node.width = fix_outer_width(node.el)
-  node.height = fix_outer_height(node.el)
+  node.width = fix_outer_size(node.el, true)
+  node.height = fix_outer_size(node.el)
 
   unless stack[node.data.group]
     stack[node.data.group] = unless node.data.stack is false
@@ -68,7 +59,7 @@ update_sticky = (node) ->
   return if node.isFixed
 
   parent_top = node.parent.offset().top
-  parent_height = fix_outer_height(node.parent)
+  parent_height = fix_outer_size(node.parent)
 
   node.passing_top = node.offset.top - node.offset_top
   node.passing_height = node.offset_height + node.offset_top
