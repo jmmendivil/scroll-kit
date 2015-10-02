@@ -7,7 +7,7 @@ stickies = []
 placeholder = (node) ->
   fixed =
     width: node.width
-    height: node.height
+    height: node.orig_height
     float: node.el.css('float')
     position: node.el.css('position')
     verticalAlign: node.el.css('vertical-align')
@@ -72,8 +72,8 @@ initialize_sticky = (node, params = {}) ->
     offset: node.offset()
     position: node.position()
     display: node.css('display')
-    isFixed: node.css('position') is 'fixed'
     isFloat: node.css('float') isnt 'none'
+    isFixed: data.fixed or (node.css('position') is 'fixed')
 
   if update_sticky(node)
     node.placeholder = placeholder(node)
@@ -82,11 +82,10 @@ initialize_sticky = (node, params = {}) ->
 check_if_fit = (sticky, scroll_top) ->
   if sticky.data.fit
     fitted_top = height + scroll_top - sticky.offset_top
-    fitted_height = Math.min(fitted_top - sticky.passing_top, sticky.height)
 
     if fitted_top >= sticky.passing_top
       sticky.el.addClass('fit') unless sticky.el.hasClass('fit')
-      sticky.el.css 'height', fitted_height
+      sticky.el.css 'height', Math.min(fitted_top - sticky.passing_top, sticky.height)
     else
       sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
 
