@@ -2,6 +2,10 @@
   "name": "jquery-velcro",
   "version": "0.1.0",
   "description": "Stick elements to the viewport",
+  "main": [
+    "jquery-velcro.js",
+    "jquery-velcro.css"
+  ],
   "dependencies": {
     "jquery": "~2.1.4"
   },
@@ -11,7 +15,9 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
+    "*.md",
     "*.html",
+    "*.json",
     "demo.css",
     "node_modules",
     "bower_components",

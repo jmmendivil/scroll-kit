@@ -4,7 +4,7 @@
   "description": "Stick elements to the viewport",
   "main": "dist/jquery-velcro.js",
   "scripts": {
-    "dev": "./node_modules/coffee-script/bin/coffee --watch --output dist --compile src/jquery-velcro.coffee",
+    "dev": "./node_modules/coffee-script/bin/coffee --watch --output . --compile src/jquery-velcro.coffee",
     "dist": "./node_modules/coffee-script/bin/coffee --output dist --compile src/jquery-velcro.coffee",
     "lint": "./node_modules/coffeelint/bin/coffeelint src/jquery-velcro.coffee"
   },
