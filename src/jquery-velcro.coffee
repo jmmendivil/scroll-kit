@@ -79,31 +79,36 @@ initialize_sticky = (node, params = {}) ->
     node.placeholder = placeholder(node)
     stickies.push(node)
 
-check_if_can_stick = (sticky) ->
-  if sticky.placeholder
-    sticky.placeholder.css('display', sticky.display)
+check_if_fit = (sticky, scroll_top) ->
+  if sticky.data.fit
+    fitted_top = height + scroll_top - sticky.offset_top
+    fitted_height = Math.min(fitted_top - sticky.passing_top, sticky.height)
 
-  sticky.el.addClass('stuck').css
-    position: 'fixed'
-    width: sticky.width
-    height: if sticky.data.fit then 'auto' else sticky.height
-    left: sticky.offset.left
-    top: sticky.offset_top
-    bottom: 0 if sticky.data.fit
+    if fitted_top >= sticky.passing_top
+      sticky.el.addClass('fit') unless sticky.el.hasClass('fit')
+      sticky.el.css 'height', fitted_height
+    else
+      sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
+
+check_if_can_stick = (sticky, scroll_top) ->
+  unless sticky.el.hasClass('stuck')
+    if sticky.placeholder
+      sticky.placeholder.css('display', sticky.display)
+
+    sticky.el.addClass('stuck').css
+      position: 'fixed'
+      width: sticky.width
+      height: sticky.height
+      left: sticky.offset.left
+      top: sticky.offset_top
+      bottom: 0 if sticky.data.fit
 
 check_if_can_unstick = (sticky, scroll_top) ->
   if sticky.el.hasClass('stuck')
     if sticky.placeholder
       sticky.placeholder.css('display', 'none')
 
-    sticky.el.removeClass('stuck bottom').attr 'style', ''
-
-  if sticky.data.fit
-    fitted_top = height + scroll_top - sticky.offset_top
-
-    if fitted_top >= sticky.passing_top
-      fitted_height = Math.min(fitted_top - sticky.passing_top, sticky.height)
-      sticky.el.css 'height', fitted_height
+    sticky.el.removeClass('fit stuck bottom').attr 'style', ''
 
 check_if_can_bottom = (sticky) ->
   unless sticky.el.hasClass('bottom')
@@ -128,18 +133,19 @@ calculate_all_stickes = ->
     if scroll_top <= sticky.passing_top
       check_if_can_unstick(sticky, scroll_top)
     else
-      unless sticky.el.hasClass('stuck')
-        check_if_can_stick(sticky)
+      check_if_can_stick(sticky, scroll_top)
 
       if (scroll_top + sticky.passing_height) >= sticky.passing_bottom
         check_if_can_bottom(sticky)
       else
         check_if_can_unbottom(sticky)
 
+    check_if_fit(sticky, scroll_top)
+
 refresh_all_stickies = (destroy) ->
   stack = {}
   stickies = stickies.filter (sticky) ->
-    sticky.el.attr('style', '').removeClass 'stuck bottom'
+    sticky.el.attr('style', '').removeClass 'fit stuck bottom'
     sticky.placeholder.remove()
 
     unless destroy
