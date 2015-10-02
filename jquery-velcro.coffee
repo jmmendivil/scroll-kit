@@ -27,14 +27,14 @@ update_sticky = (node) ->
     0
 
   # original value
-  node.orig_height = node.el.outerHeight()
+  node.orig_height = node.el.outerHeight(true)
 
   stack[node.data.group] += node.orig_height unless node.isFloat
 
   return if node.isFixed
 
   parent_top = node.parent.offset().top
-  parent_height = node.parent.outerHeight()
+  parent_height = node.parent.height()
 
   node.offset = node.el.offset()
   node.height = node.orig_height
