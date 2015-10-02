@@ -4,27 +4,6 @@ height = win.height()
 stack = {}
 stickies = []
 
-get_computed = (node) ->
-  computed = getComputedStyle node[0]
-
-  (name) ->
-    parseFloat computed.getPropertyValue(name)
-
-fix_outer_size = (node, width) ->
-  if getComputedStyle
-    prop = get_computed(node)
-
-    x = if width then 'left' else 'top'
-    y = if width then 'right' else 'bottom'
-
-    z = prop(if width then 'width' else 'height') + prop('margin-' + x) + prop('margin-' + y)
-
-    if prop('box-sizing') isnt 'border-box'
-      z += prop('border-' + x + '-width') + prop('border-' + y + '-width') + prop('padding-' + x) + prop('padding-' + y)
-    z
-  else
-    node[if width then 'outerWidth' else 'outerHeight'] true
-
 placeholder = (node) ->
   fixed =
     width: node.width
@@ -36,11 +15,6 @@ placeholder = (node) ->
   $('<div/>').css(fixed).css('display', 'none').insertBefore(node.el)
 
 update_sticky = (node) ->
-  node.offset = node.el.offset()
-  node.position = node.el.position()
-  node.width = fix_outer_size(node.el, true)
-  node.height = fix_outer_size(node.el)
-
   unless stack[node.data.group]
     stack[node.data.group] = unless node.data.stack is false
       stack[node.data.stack or 'all'] or 0
@@ -52,27 +26,27 @@ update_sticky = (node) ->
   else
     0
 
-  node.offset_height = node.height
+  # original value
+  node.orig_height = node.el.outerHeight()
 
-  stack[node.data.group] += node.offset_height unless node.isFloat
+  stack[node.data.group] += node.orig_height unless node.isFloat
 
   return if node.isFixed
 
-  border_top = parseInt(node.parent.css('border-top-width'), 10)
-  padding_top = parseInt(node.parent.css('padding-top'), 10)
-  padding_bottom = parseInt(node.parent.css('padding-bottom'), 10)
+  parent_top = node.parent.offset().top
+  parent_height = node.parent.outerHeight()
 
-  parent_top = node.parent.offset().top + border_top + padding_top
-  parent_height = fix_outer_size(node.parent)
+  node.offset = node.el.offset()
+  node.height = node.orig_height
+  node.width = node.el.outerWidth()
+  node.position = node.el.position()
 
-  offset_top = node.offset.top - (parseInt(node.el.css('margin-top'), 10) or 0)
-
-  node.passing_top = offset_top - node.offset_top
-  node.passing_height = node.offset_height + node.offset_top
+  node.passing_top = node.offset.top - node.offset_top
+  node.passing_height = node.orig_height + node.offset_top
   node.passing_bottom = parent_top + parent_height
 
   if node.data.fit
-    fixed_bottom = offset_top + node.offset_height
+    fixed_bottom = node.offset.top + node.orig_height
     node.fixed_bottom = node.passing_bottom - fixed_bottom
     node.passing_bottom = fixed_bottom
 
