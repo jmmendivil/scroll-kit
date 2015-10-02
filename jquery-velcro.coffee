@@ -1,13 +1,16 @@
 # :)
 stack = {}
 
+# cached
+win = $(window)
+
 listen_to = (root) ->
   # support for isolated viewports/elements
   unless stack[root]
     element = unless root is 'window'
       $(root)
     else
-      $(window)
+      win
 
     stack[root] =
       el: element
@@ -159,34 +162,43 @@ calculate_all_stickes = (root) ->
 
     check_if_fit(root, sticky, scroll_top)
 
-refresh_all_stickies = (destroy) ->
-  # stack = {}
-  # stickies = stickies.filter (sticky) ->
-  #   sticky.el.attr('style', '').removeClass 'fit stuck bottom'
-  #   sticky.placeholder.remove()
+refresh_all_stickies = (root, destroy) ->
+  root.offsets = {}
+  root.nodes = root.nodes.filter (sticky) ->
+    sticky.el.attr('style', '').removeClass 'fit stuck bottom'
+    sticky.placeholder.remove()
 
-  #   unless destroy
-  #     update_sticky(sticky)
-  #     sticky.placeholder = placeholder(sticky)
-  #     return true
+    unless destroy
+      update_sticky(root, sticky)
+      sticky.placeholder = placeholder(sticky)
+      return true
 
-  #   false
+    false
 
-#win.on 'resize', ->
-#  height = win.height()
-#  refresh_all_stickies()
-#  calculate_all_stickes()
+update_everything = (destroy) ->
+  for id, root of stack
+    refresh_all_stickies(root, destroy)
+    calculate_all_stickes(root)
+
+# win.on 'resize', ->
+#   for id, root of stack
+#     fixed_height = root.el.height()
+
+#     if fixed_height isnt root.cached_height
+#       root.cached_height = fixed_height
+
+#       refresh_all_stickies(root)
+#       calculate_all_stickes(root)
 
 $.velcro = (selector, params = {}) ->
   if selector is 'destroy'
-    refresh_all_stickies(true)
-
-  else if selector is 'update'
-    refresh_all_stickies()
-
+    update_everything(true)
   else
-    $(selector).each ->
-      initialize_sticky $(this), params
+    unless selector is 'update'
+      $(selector).each ->
+        initialize_sticky $(this), params
 
-  #calculate_all_stickes()
-  console.log 'STACK', stack
+    update_everything()
+
+  # return
+  undefined
