@@ -1,0 +1,7 @@
+/* this reset is required in order to avoid positioning issues */
+* { box-sizing: border-box; padding: 0; margin: 0; }
+
+.has-stickies { position: relative; overflow: hidden; }
+.is-sticky { z-index: 1.1; }
+.is-sticky.stuck { z-index: 1.2; }
+.is-sticky.stuck.bottom { z-index: 1.0; }
