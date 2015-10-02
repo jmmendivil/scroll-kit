@@ -15,15 +15,10 @@ placeholder = (node) ->
   $('<div/>').css(fixed).css('display', 'none').insertBefore(node.el)
 
 update_sticky = (node) ->
-  props =
-    offset: node.el.offset()
-    position: node.el.position()
-    width: node.el.outerWidth(true)
-    height: node.el.outerHeight(true)
-    display: node.el.css('display')
-    isFloat: node.el.css('float') isnt 'none'
-
-  node[k] = v for k, v of props
+  node.offset = node.el.offset()
+  node.position = node.el.position()
+  node.width = node.el.outerWidth(true)
+  node.height = node.el.outerHeight(true)
 
   unless stack[node.data.group]
     # TODO: reuse another stack for initial offsets
@@ -32,8 +27,9 @@ update_sticky = (node) ->
   node.offset_top = stack[node.data.group]
   node.offset_height = node.height
 
-  # may be skip them while computing offsets | stack | bottom
   stack[node.data.group] += node.offset_height unless node.isFloat
+
+  return if node.isFixed
 
   parent_top = node.parent.offset().top
   parent_height = node.parent.outerHeight(true)
@@ -42,13 +38,7 @@ update_sticky = (node) ->
   node.passing_height = node.offset_height + node.offset_top
   node.passing_bottom = parent_top + parent_height
 
-  node.placeholder = placeholder(node, node.data)
-
-  # when bottoming the stack's offset should be subtracted
-  # otherwise restore it initial height for
-
   if node.data.fit
-    # all floated stickies should fit to the viewport?
     fixed_bottom = node.offset.top + node.offset_height
     node.fixed_bottom = node.passing_bottom - fixed_bottom
     node.passing_bottom = fixed_bottom
@@ -60,10 +50,6 @@ update_sticky = (node) ->
   true
 
 initialize_sticky = (node, params = {}) ->
-  isFixed = node.css('position') is 'fixed'
-
-  return if isFixed
-
   data = $.extend({}, params, node.data('sticky') or {})
   data.group or= 'all'
 
@@ -76,9 +62,15 @@ initialize_sticky = (node, params = {}) ->
     el: node
     data: data
     parent: parent
-    isFixed: isFixed
+    offset: node.offset()
+    position: node.position()
+    display: node.css('display')
+    isFixed: node.css('position') is 'fixed'
+    isFloat: node.css('float') isnt 'none'
 
-  stickies.push(node) if update_sticky(node)
+  if update_sticky(node)
+    node.placeholder = placeholder(node)
+    stickies.push(node)
 
 check_if_can_stick = (sticky) ->
   if sticky.placeholder
@@ -130,17 +122,41 @@ calculate_all_stickes = ->
     else
       unless sticky.el.hasClass('stuck')
         check_if_can_stick(sticky)
+
+      if (scroll_top + sticky.passing_height) >= sticky.passing_bottom
+        check_if_can_bottom(sticky)
       else
-        if (scroll_top + sticky.passing_height) >= sticky.passing_bottom
-          check_if_can_bottom(sticky)
-        else
-          check_if_can_unbottom(sticky)
+        check_if_can_unbottom(sticky)
 
-win.on 'touchmove', calculate_all_stickes
-win.on 'scroll', calculate_all_stickes
+refresh_all_stickies = (destroy) ->
+  stack = {}
+  stickies = stickies.filter (sticky) ->
+    sticky.el.attr('style', '').removeClass 'stuck bottom'
+    sticky.placeholder.remove()
 
-$.velcro = (selector = '.is-velcro', params = {}) ->
-  $(selector).each ->
-    initialize_sticky $(this), params
+    unless destroy
+      update_sticky(sticky)
+      sticky.placeholder = placeholder(sticky)
+      return true
 
-  setTimeout(calculate_all_stickes, 10)
+    false
+
+win.on 'touchmove', -> calculate_all_stickes()
+win.on 'scroll', -> calculate_all_stickes()
+win.on 'resize', ->
+  height = win.height()
+  refresh_all_stickies()
+  calculate_all_stickes()
+
+$.velcro = (selector, params = {}) ->
+  if selector is 'destroy'
+    refresh_all_stickies(true)
+
+  else if selector is 'update'
+    refresh_all_stickies()
+
+  else
+    $(selector).each ->
+      initialize_sticky $(this), params
+
+  calculate_all_stickes()
