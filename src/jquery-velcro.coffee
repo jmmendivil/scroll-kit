@@ -21,10 +21,16 @@ update_sticky = (node) ->
   node.height = node.el.outerHeight(true)
 
   unless stack[node.data.group]
-    # TODO: reuse another stack for initial offsets
-    stack[node.data.group] = stack.all or 0
+    stack[node.data.group] = unless node.data.stack is false
+      stack[node.data.stack or 'all'] or 0
+    else
+      0
 
-  node.offset_top = stack[node.data.group]
+  node.offset_top = unless node.data.stack is false
+    stack[node.data.group]
+  else
+    0
+
   node.offset_height = node.height
 
   stack[node.data.group] += node.offset_height unless node.isFloat
@@ -95,7 +101,8 @@ check_if_can_unstick = (sticky, scroll_top) ->
     fitted_top = height + scroll_top - sticky.offset_top
 
     if fitted_top >= sticky.passing_top
-      sticky.el.css 'height', fitted_top - sticky.passing_top
+      fitted_height = Math.min(fitted_top - sticky.passing_top, sticky.height)
+      sticky.el.css 'height', fitted_height
 
 check_if_can_bottom = (sticky) ->
   unless sticky.el.hasClass('bottom')
