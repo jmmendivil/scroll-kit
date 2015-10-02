@@ -163,7 +163,13 @@ calculate_all_stickes = (root) ->
     check_if_fit(root, sticky, scroll_top)
 
 refresh_all_stickies = (root, destroy) ->
+  # reindex
   root.offsets = {}
+
+  # forced update always!
+  root.cached_height = root.el.height()
+
+  # filter out removed elements?
   root.nodes = root.nodes.filter (sticky) ->
     sticky.el.attr('style', '').removeClass 'fit stuck bottom'
     sticky.placeholder.remove()
@@ -180,15 +186,8 @@ update_everything = (destroy) ->
     refresh_all_stickies(root, destroy)
     calculate_all_stickes(root)
 
-# win.on 'resize', ->
-#   for id, root of stack
-#     fixed_height = root.el.height()
-
-#     if fixed_height isnt root.cached_height
-#       root.cached_height = fixed_height
-
-#       refresh_all_stickies(root)
-#       calculate_all_stickes(root)
+win.on 'resize', ->
+  update_everything()
 
 $.velcro = (selector, params = {}) ->
   if selector is 'destroy'
