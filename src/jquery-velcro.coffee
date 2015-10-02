@@ -122,7 +122,7 @@ check_if_can_unstick = (sticky, scroll_top) ->
     if sticky.placeholder
       sticky.placeholder.css('display', 'none')
 
-    sticky.el.removeClass('stuck bottom').css position: 'static'
+    sticky.el.removeClass('stuck bottom').attr 'style', ''
 
   if sticky.data.fit
     fitted_top = height + scroll_top - sticky.offset_top
