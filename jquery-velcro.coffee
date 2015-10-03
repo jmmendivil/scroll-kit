@@ -202,6 +202,8 @@ update_everything = (destroy) ->
 
 win.on 'resize', ->
   update_everything()
+  # TODO: root-elements are not being updated correctly unless its scrollTop() is 0
+  undefined
 
 $.velcro = (selector, params = {}) ->
   if selector is 'destroy'
