@@ -1,3 +1,5 @@
+group_id = 0
+
 # :)
 stack = {}
 
@@ -93,12 +95,19 @@ initialize_sticky = (node, params = {}) ->
   root = listen_to(data.root or 'window')
 
   # used for internal stacks
-  data.group or= 'all'
+  data.group or= 0
 
   parent = if data.parent
     node.closest(data.parent)
   else
     node.parent()
+
+  # auto-grouping
+  unless data.group
+    unless parent.data('velcro_gid') > 0
+      parent.data 'velcro_gid', group_id += 1
+
+  data.group += '.' + (parent.data('velcro_gid') or 0)
 
   node =
     el: node
