@@ -7,25 +7,29 @@ win = $(window)
 listen_to = (root) ->
   # support for isolated viewports/elements
   unless stack[root]
-    element = unless root is 'window'
-      $(root)
-    else
-      win
-
-    offset_top = unless root is 'window'
-      element.offset().top
-    else
-      0
+    is_win = root is 'window'
+    element = unless is_win then $(root) else win
 
     stack[root] =
       el: element
+      is_win: is_win
+
+      # cache
       nodes: []
       offsets: {}
-      cached_top: offset_top
-      cached_height: element.height()
+
+    on_refresh = ->
+      stack[root].cached_top = unless is_win then element.offset().top else 0
+      stack[root].cached_height = element.height()
 
     on_scroll = ->
       calculate_all_stickes(stack[root])
+
+    on_refresh()
+
+    # keep the reference for GC
+    stack[root].update = on_refresh
+    stack[root].callback = on_scroll
 
     element.on 'touchmove scroll', on_scroll
 
@@ -49,6 +53,10 @@ update_sticky = (root, node) ->
 
   # original value
   node.orig_height = node.el.outerHeight(true)
+
+  # avoid overflow on fixed-elements!
+  unless (node.data.fit or root.is_win)
+    node.orig_height = Math.min(root.cached_height, node.orig_height)
 
   # increment the node offset_top based on current group/stack
   root.offsets[node.data.group] += node.orig_height unless node.isFloat
@@ -173,7 +181,7 @@ refresh_all_stickies = (root, destroy) ->
   root.offsets = {}
 
   # forced update always!
-  root.cached_height = root.el.height()
+  root.update()
 
   # filter out removed elements?
   root.nodes = root.nodes.filter (sticky) ->
