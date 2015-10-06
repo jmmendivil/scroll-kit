@@ -1,6 +1,6 @@
 {
   "name": "jquery-velcro",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Stick elements to the viewport",
   "main": "jquery-velcro.js",
   "scripts": {
