@@ -21,8 +21,7 @@ placeholder = (node) ->
 
 update_sticky = (node) ->
   unless stack.offsets[node.data.group]
-    # TODO: this initial offset could be overriden by user params
-    stack.offsets[node.data.group] = 0
+    stack.offsets[node.data.group] = node.data.offset or 0
 
   node.offset_top = stack.offsets[node.data.group]
 
@@ -32,7 +31,7 @@ update_sticky = (node) ->
   # increment the node offset_top based on current group/stack
   stack.offsets[node.data.group] += node.orig_height unless node.isFloat
 
-  return if node.isFixed
+  return true if node.isFixed
 
   parent_top = node.parent.offset().top
   parent_height = node.parent.height()
@@ -47,9 +46,10 @@ update_sticky = (node) ->
   node.passing_bottom = parent_top + parent_height
 
   if node.data.fit
-    fixed_bottom = node.offset.top + node.orig_height
-    node.fixed_bottom = node.passing_bottom - fixed_bottom
-    node.passing_bottom = fixed_bottom
+    if node.isFloat
+      fixed_bottom = node.offset.top + node.orig_height
+      node.fixed_bottom = node.passing_bottom - fixed_bottom
+      node.passing_bottom = fixed_bottom
 
     if node.height >= win_height
       node.passing_height = win_height
@@ -139,6 +139,8 @@ calculate_all_stickes = ->
   scroll_top = win.scrollTop()
 
   stack.nodes.forEach (sticky) ->
+    return if sticky.isFixed
+
     if scroll_top <= sticky.passing_top
       check_if_can_unstick(sticky, scroll_top)
     else
