@@ -1,41 +1,13 @@
 group_id = 0
 
 # :)
-stack = {}
+stack =
+  nodes: []
+  offsets: {}
 
 # cached
 win = $(window)
-
-listen_to = (root) ->
-  # support for isolated viewports/elements
-  unless stack[root]
-    is_win = root is 'window'
-    element = unless is_win then $(root) else win
-
-    stack[root] =
-      el: element
-      is_win: is_win
-
-      # cache
-      nodes: []
-      offsets: {}
-
-    on_refresh = ->
-      stack[root].cached_top = unless is_win then element.offset().top else 0
-      stack[root].cached_height = element.height()
-
-    on_scroll = ->
-      calculate_all_stickes(stack[root])
-
-    on_refresh()
-
-    # keep the reference for GC
-    stack[root].update = on_refresh
-    stack[root].callback = on_scroll
-
-    element.on 'touchmove scroll', on_scroll
-
-  stack[root]
+win_height = win.height()
 
 placeholder = (node) ->
   fixed =
@@ -47,21 +19,18 @@ placeholder = (node) ->
 
   $('<div/>').css(fixed).css('display', 'none').insertBefore(node.el)
 
-update_sticky = (root, node) ->
-  unless root.offsets[node.data.group]
-    root.offsets[node.data.group] = root.cached_top
+update_sticky = (node) ->
+  unless stack.offsets[node.data.group]
+    # TODO: this initial offset could be overriden by user params
+    stack.offsets[node.data.group] = 0
 
-  node.offset_top = root.offsets[node.data.group]
+  node.offset_top = stack.offsets[node.data.group]
 
   # original value
   node.orig_height = node.el.outerHeight(true)
 
-  # avoid overflow on fixed-elements!
-  unless (node.data.fit or root.is_win)
-    node.orig_height = Math.min(root.cached_height, node.orig_height)
-
   # increment the node offset_top based on current group/stack
-  root.offsets[node.data.group] += node.orig_height unless node.isFloat
+  stack.offsets[node.data.group] += node.orig_height unless node.isFloat
 
   return if node.isFixed
 
@@ -82,17 +51,14 @@ update_sticky = (root, node) ->
     node.fixed_bottom = node.passing_bottom - fixed_bottom
     node.passing_bottom = fixed_bottom
 
-    if node.height >= root.cached_height
-      node.passing_height = root.cached_height
-      node.height = root.cached_height - node.offset_top
+    if node.height >= win_height
+      node.passing_height = win_height
+      node.height = win_height - node.offset_top
 
   true
 
 initialize_sticky = (node, params = {}) ->
   data = $.extend({}, params, node.data('sticky') or {})
-
-  # used for isolated scroll events
-  root = listen_to(data.root or 'window')
 
   # used for internal stacks
   data.group or= 0
@@ -119,13 +85,13 @@ initialize_sticky = (node, params = {}) ->
     isFloat: node.css('float') isnt 'none'
     isFixed: data.fixed or (node.css('position') is 'fixed')
 
-  if update_sticky(root, node)
+  if update_sticky(node)
     node.placeholder = placeholder(node)
-    root.nodes.push(node)
+    stack.nodes.push(node)
 
-check_if_fit = (root, sticky, scroll_top) ->
+check_if_fit = (sticky, scroll_top) ->
   if sticky.data.fit
-    fitted_top = root.cached_height + scroll_top - sticky.offset_top
+    fitted_top = win_height + scroll_top - sticky.offset_top
 
     if fitted_top >= sticky.passing_top
       sticky.el.addClass('fit') unless sticky.el.hasClass('fit')
@@ -133,7 +99,7 @@ check_if_fit = (root, sticky, scroll_top) ->
     else
       sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
 
-check_if_can_stick = (root, sticky, scroll_top) ->
+check_if_can_stick = (sticky, scroll_top) ->
   unless sticky.el.hasClass('stuck')
     if sticky.placeholder
       sticky.placeholder.css('display', sticky.display)
@@ -146,14 +112,14 @@ check_if_can_stick = (root, sticky, scroll_top) ->
       top: sticky.offset_top
       bottom: 0 if sticky.data.fit
 
-check_if_can_unstick = (root, sticky, scroll_top) ->
+check_if_can_unstick = (sticky, scroll_top) ->
   if sticky.el.hasClass('stuck')
     if sticky.placeholder
       sticky.placeholder.css('display', 'none')
 
     sticky.el.removeClass('fit stuck bottom').attr 'style', ''
 
-check_if_can_bottom = (root, sticky) ->
+check_if_can_bottom = (sticky) ->
   unless sticky.el.hasClass('bottom')
     sticky.el.addClass('bottom').css
       position: 'absolute'
@@ -162,57 +128,60 @@ check_if_can_bottom = (root, sticky) ->
       top: 'auto'
       height: sticky.height if sticky.data.fit
 
-check_if_can_unbottom = (root, sticky) ->
+check_if_can_unbottom = (sticky) ->
   if sticky.el.hasClass('bottom')
     sticky.el.removeClass('bottom').css
       position: 'fixed'
       left: sticky.offset.left
       top: sticky.offset_top
 
-calculate_all_stickes = (root) ->
-  scroll_top = root.el.scrollTop()
+calculate_all_stickes = ->
+  scroll_top = win.scrollTop()
 
-  root.nodes.forEach (sticky) ->
+  stack.nodes.forEach (sticky) ->
     if scroll_top <= sticky.passing_top
-      check_if_can_unstick(root, sticky, scroll_top)
+      check_if_can_unstick(sticky, scroll_top)
     else
-      check_if_can_stick(root, sticky, scroll_top)
+      check_if_can_stick(sticky, scroll_top)
 
       if (scroll_top + sticky.passing_height) >= sticky.passing_bottom
-        check_if_can_bottom(root, sticky)
+        check_if_can_bottom(sticky)
       else
-        check_if_can_unbottom(root, sticky)
+        check_if_can_unbottom(sticky)
 
-    check_if_fit(root, sticky, scroll_top)
+    check_if_fit(sticky, scroll_top)
 
-refresh_all_stickies = (root, destroy) ->
+  # return
+  undefined
+
+refresh_all_stickies = (destroy) ->
   # reindex
-  root.offsets = {}
+  stack.offsets = {}
 
   # forced update always!
-  root.update()
+  win_height = win.height()
 
   # filter out removed elements?
-  root.nodes = root.nodes.filter (sticky) ->
+  stack.nodes = stack.nodes.filter (sticky) ->
     sticky.el.attr('style', '').removeClass 'fit stuck bottom'
     sticky.placeholder.remove()
 
     unless destroy
-      update_sticky(root, sticky)
+      update_sticky(sticky)
       sticky.placeholder = placeholder(sticky)
       return true
 
     false
 
 update_everything = (destroy) ->
-  for id, root of stack
-    refresh_all_stickies(root, destroy)
-    calculate_all_stickes(root)
+  refresh_all_stickies(destroy)
+  calculate_all_stickes()
+
+win.on 'touchmove scroll', ->
+  calculate_all_stickes()
 
 win.on 'resize', ->
   update_everything()
-  # TODO: root-elements are not being updated correctly unless its scrollTop() is 0
-  undefined
 
 $.velcro = (selector, params = {}) ->
   if selector is 'destroy'
