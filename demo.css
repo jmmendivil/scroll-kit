@@ -2,7 +2,7 @@
 
 p { padding: 10px; }
 main { margin: 10px; }
-section { border: 1px solid #DDDDDD; }
+section { border: 1px solid #DDDDDD; background: #FFFFFF; }
 section ~ section { margin-top: 10px; }
 
 .left { float: left; }
@@ -20,10 +20,13 @@ section ~ section { margin-top: 10px; }
 
 .stats {
   border: 1px solid #DDDDDD;
+  background: #FFFFFF;
   position: fixed;
-  left: 10px;
-  top: 10px;
+  padding: 10px;
+  left: 0;
+  top: 0;
   width: 200px;
+  z-index: 1;
 }
 
 @media screen and (min-width: 798px) {
