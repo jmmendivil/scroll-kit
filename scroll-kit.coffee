@@ -2,8 +2,8 @@ group_id = 0
 
 # :)
 stack =
-  nodes: []
   offsets: {}
+  stickyNodes: []
 
 # cached
 win = $(window)
@@ -57,37 +57,34 @@ update_sticky = (node) ->
 
   true
 
-initialize_sticky = (node, params = {}) ->
-  data = $.extend({}, params, node.data('sticky') or {})
+initialize_sticky = (node) ->
+  el = $(node)
+  data = $.extend({}, el.data('sticky') or {})
 
   # used for internal stacks
   data.group or= 0
 
   parent = if data.parent
-    node.closest(data.parent)
+    el.closest(data.parent)
   else
-    node.parent()
+    el.parent()
 
   # auto-grouping
   unless data.group
-    unless parent.data('velcro_gid') > 0
-      parent.data 'velcro_gid', group_id += 1
+    unless parent.data('scrollKit_gid') > 0
+      parent.data 'scrollKit_gid', group_id += 1
 
-  data.group += '.' + (parent.data('velcro_gid') or 0)
+  data.group += '.' + (parent.data('scrollKit_gid') or 0)
 
-  node =
-    el: node
-    data: data
-    parent: parent
-    offset: node.offset()
-    position: node.position()
-    display: node.css('display')
-    isFloat: node.css('float') isnt 'none'
-    isFixed: data.fixed or (node.css('position') is 'fixed')
-
-  if update_sticky(node)
-    node.placeholder = placeholder(node)
-    stack.nodes.push(node)
+  node.el = el
+  node.data = data
+  node.parent = parent
+  node.offset = el.offset()
+  node.position = el.position()
+  node.display = el.css('display')
+  node.isFloat = el.css('float') isnt 'none'
+  node.isFixed = data.fixed or (el.css('position') is 'fixed')
+  node.placeholder = placeholder(node) if update_sticky(node)
 
 check_if_fit = (sticky, scroll_top) ->
   if sticky.data.fit
@@ -138,8 +135,8 @@ check_if_can_unbottom = (sticky) ->
 calculate_all_stickes = ->
   scroll_top = win.scrollTop()
 
-  stack.nodes.forEach (sticky) ->
-    return if sticky.isFixed
+  for sticky in stack.stickyNodes
+    continue if sticky.isFixed
 
     if scroll_top <= sticky.passing_top
       check_if_can_unstick(sticky, scroll_top)
@@ -163,17 +160,19 @@ refresh_all_stickies = (destroy) ->
   # forced update always!
   win_height = win.height()
 
-  # filter out removed elements?
-  stack.nodes = stack.nodes.filter (sticky) ->
+  # detach destroyed stickies
+  for sticky in stack.stickyNodes
+    initialize_sticky(sticky) unless sticky.el
+
     sticky.el.attr('style', '').removeClass 'fit stuck bottom'
     sticky.placeholder.remove()
 
     unless destroy
       update_sticky(sticky)
       sticky.placeholder = placeholder(sticky)
-      return true
 
-    false
+  # return
+  undefined
 
 update_everything = (destroy) ->
   refresh_all_stickies(destroy)
@@ -185,13 +184,13 @@ win.on 'touchmove scroll', ->
 win.on 'resize', ->
   update_everything()
 
-$.scrollKit = (selector, params = {}) ->
-  if selector is 'destroy'
+$.scrollKit = (params = {}) ->
+  if params is 'destroy'
     update_everything(true)
   else
-    unless selector is 'update'
-      $(selector).each ->
-        initialize_sticky $(this), params
+    unless params is 'update'
+      sticky_className = params.stickyClassName or 'is-sticky'
+      stack.stickyNodes = document.getElementsByClassName sticky_className
 
     update_everything()
 
