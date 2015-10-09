@@ -162,14 +162,15 @@ refresh_all_stickies = (destroy) ->
 
   # detach destroyed stickies
   for sticky in stack.stickyNodes
-    initialize_sticky(sticky) unless sticky.el
+    unless sticky.el
+      initialize_sticky(sticky)
+    else
+      sticky.el.attr('style', '').removeClass 'fit stuck bottom'
+      sticky.placeholder.remove()
 
-    sticky.el.attr('style', '').removeClass 'fit stuck bottom'
-    sticky.placeholder.remove()
-
-    unless destroy
-      update_sticky(sticky)
-      sticky.placeholder = placeholder(sticky)
+      unless destroy
+        update_sticky(sticky)
+        sticky.placeholder = placeholder(sticky)
 
   # return
   undefined
