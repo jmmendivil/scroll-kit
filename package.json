@@ -1,8 +1,8 @@
 {
-  "name": "jquery-velcro",
-  "version": "0.1.4",
+  "name": "scroll-kit",
+  "version": "0.0.0",
   "description": "Stick elements to the viewport",
-  "main": "jquery-velcro.js",
+  "main": "scroll-kit.js",
   "scripts": {
     "dev": "./node_modules/coffee-script/bin/coffee --watch --output . --compile *.coffee",
     "dist": "./node_modules/coffee-script/bin/coffee --output . --compile *.coffee",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/gextech/jquery-velcro.git"
+    "url": "git+ssh://git@bitbucket.org/gextech/scroll-kit.git"
   },
   "author": "Alvaro Cabrera <pateketrueke@gmail.com>",
   "license": "MIT",

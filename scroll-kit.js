@@ -205,7 +205,7 @@
     return update_everything();
   });
 
-  $.velcro = function(selector, params) {
+  $.scrollKit = function(selector, params) {
     if (params == null) {
       params = {};
     }

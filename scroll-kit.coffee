@@ -185,7 +185,7 @@ win.on 'touchmove scroll', ->
 win.on 'resize', ->
   update_everything()
 
-$.velcro = (selector, params = {}) ->
+$.scrollKit = (selector, params = {}) ->
   if selector is 'destroy'
     update_everything(true)
   else
