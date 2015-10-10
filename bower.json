@@ -18,6 +18,7 @@
     "*.md",
     "*.html",
     "*.json",
+    "demo.js",
     "demo.css",
     "node_modules",
     "bower_components",
