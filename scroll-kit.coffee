@@ -338,3 +338,9 @@ $.scrollKit.scrollTo = (index, offset_top) ->
     scrollTop: stack.contentNodes[index].offset.top - (offset_top or 0)
   , 260, 'swing'
   return
+
+# convenience method
+$.scrollKit.eventHandler = (callback) ->
+  old_handler = event_handler
+  event_handler = callback if typeof callback is 'function'
+  old_handler
