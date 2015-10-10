@@ -10,12 +10,10 @@ $(function() {
       jump = output.find('.jump'),
       keys = output.find('.keys');
 
-  var offset_top = $('main').offset().top;
-
   jump.on('change', function() {
     var node = stack.contentNodes[jump.val()];
 
-    $(window).scrollTop(node.offset.top - offset_top);
+    $(window).scrollTop(node.offset.top - parseInt(node.el.css('margin-top'), 10));
   });
 
   function render() {
