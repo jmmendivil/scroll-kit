@@ -15,7 +15,7 @@ Scenario: Scrolling a bit
   And should I see "static / forward" within "#stats .from_to"
 
   When I scroll to "0"
-  And should I see "forward / backward" within "#stats .from_to"
+  Then should I see "forward / backward" within "#stats .from_to"
 
   When I stop for "1s"
   Then should I see "backward / static" within "#stats .from_to"
