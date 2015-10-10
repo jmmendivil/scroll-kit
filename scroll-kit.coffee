@@ -3,6 +3,7 @@ group_id = 0
 last_scroll = -1
 last_direction = ''
 
+event_handler = null
 static_interval = null
 
 # :)
@@ -10,7 +11,6 @@ stack =
   offsets: {}
   stickyNodes: []
   contentNodes: []
-  contentNodes_length: 0
 
 # cached
 win = $(window)
@@ -19,10 +19,14 @@ win_height = win.height()
 # use for directions
 body = $(document.body)
 
+trigger = (evt, node, scroll) ->
+  event_handler?(evt, node, scroll)
+
 set_classes = (name) ->
   unless body.hasClass(name)
     body.removeClass('backward forward static').addClass(name)
     last_direction = name
+  return
 
 test_on_scroll = (offset) ->
   unless offset
@@ -41,6 +45,7 @@ test_on_scroll = (offset) ->
   static_interval = setTimeout ->
     set_classes('static')
   , 200
+  return
 
 update_offsets = (node) ->
   # store a jQuery reference due its usefulness D:
@@ -51,52 +56,53 @@ update_offsets = (node) ->
     top: node.el.offset().top
     height: node.el.outerHeight(true)
     is_passing: node.offset and node.offset.is_passing
+  return
 
-update_metrics = (i, node, scroll_top) ->
-  fixed_bottom = (win_height - node.offset.top) + scroll_top
+update_metrics = (i, node, scroll) ->
+  fixed_bottom = (win_height - node.offset.top) + scroll
 
   if node.offset.top_from_bottom isnt fixed_bottom
     node.offset.index = i
     node.offset.top_from_bottom = fixed_bottom
-    node.offset.top_from_top = node.offset.top - scroll_top
+    node.offset.top_from_top = node.offset.top - scroll
     node.offset.bottom_from_bottom = fixed_bottom - node.offset.height
-    node.offset.bottom_from_top = (node.offset.height - scroll_top) + node.offset.top
-
-    # return
+    node.offset.bottom_from_top = (node.offset.height - scroll) + node.offset.top
     true
 
-test_node_passing = (node) ->
-  #console.log('on-content.passing', node) if node.offset.is_passing
+test_node_passing = (node, scroll) ->
+  trigger('passing', node, scroll) if node.offset.is_passing
 
-test_node_scroll = (node) ->
-  #console.log 'on-content.scroll', node
+test_node_scroll = (node, scroll) ->
+  trigger 'scroll', node, scroll
 
-test_node_enter = (node) ->
+test_node_enter = (node, scroll) ->
   return if node.offset.is_passing
   return if node.offset.top_from_bottom <= 0
   return if node.offset.bottom_from_top <= 0
 
   node.offset.is_passing = true
-  console.log 'on-content.enter', node
+  trigger 'enter', node, scroll
 
-test_node_exit = (node) ->
+test_node_exit = (node, scroll) ->
   return unless node.offset.is_passing
   return unless (node.offset.top_from_bottom <= 0) or (node.offset.bottom_from_top <= 0)
 
   node.offset.is_passing = false
-  console.log 'on-content.exit', node
+  trigger 'exit', node, scroll
 
-test_all_offsets = (scroll_top) ->
+test_all_offsets = (scroll) ->
   for node, i in stack.contentNodes
-    if update_metrics(i, node, scroll_top)
+    if update_metrics(i, node, scroll)
       # im not sure if the order is right?
-      test_node_scroll(node)
-      test_node_enter(node)
-      test_node_exit(node)
-      test_node_passing(node)
+      test_node_scroll(node, scroll)
+      test_node_enter(node, scroll)
+      test_node_exit(node, scroll)
+      test_node_passing(node, scroll)
+  return
 
 calculate_all_offsets = ->
   update_offsets(node) for node in stack.contentNodes
+  return
 
 placeholder = (node) ->
   fixed =
@@ -174,10 +180,11 @@ initialize_sticky = (node) ->
   node.isFloat = el.css('float') isnt 'none'
   node.isFixed = data.fixed or (el.css('position') is 'fixed')
   node.placeholder = placeholder(node) if update_sticky(node)
+  return
 
-check_if_fit = (sticky, scroll_top) ->
+check_if_fit = (sticky, scroll) ->
   if sticky.data.fit
-    fitted_top = win_height + scroll_top - sticky.offset_top
+    fitted_top = win_height + scroll - sticky.offset_top
 
     if fitted_top >= sticky.passing_top
       sticky.el.addClass('fit') unless sticky.el.hasClass('fit')
@@ -185,7 +192,7 @@ check_if_fit = (sticky, scroll_top) ->
     else
       sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
 
-check_if_can_stick = (sticky, scroll_top) ->
+check_if_can_stick = (sticky, scroll) ->
   unless sticky.el.hasClass('stuck')
     if sticky.placeholder
       sticky.placeholder.css('display', sticky.display)
@@ -198,7 +205,7 @@ check_if_can_stick = (sticky, scroll_top) ->
       top: sticky.offset_top
       bottom: 0 if sticky.data.fit
 
-check_if_can_unstick = (sticky, scroll_top) ->
+check_if_can_unstick = (sticky, scroll) ->
   if sticky.el.hasClass('stuck')
     if sticky.placeholder
       sticky.placeholder.css('display', 'none')
@@ -221,24 +228,22 @@ check_if_can_unbottom = (sticky) ->
       left: sticky.offset.left
       top: sticky.offset_top
 
-calculate_all_stickes = (scroll_top) ->
+calculate_all_stickes = (scroll) ->
   for sticky in stack.stickyNodes
     continue if sticky.isFixed
 
-    if scroll_top <= sticky.passing_top
-      check_if_can_unstick(sticky, scroll_top)
+    if scroll <= sticky.passing_top
+      check_if_can_unstick(sticky, scroll)
     else
-      check_if_can_stick(sticky, scroll_top)
+      check_if_can_stick(sticky, scroll)
 
-      if (scroll_top + sticky.passing_height) >= sticky.passing_bottom
+      if (scroll + sticky.passing_height) >= sticky.passing_bottom
         check_if_can_bottom(sticky)
       else
         check_if_can_unbottom(sticky)
 
-    check_if_fit(sticky, scroll_top)
-
-  # return
-  undefined
+    check_if_fit(sticky, scroll)
+  return
 
 refresh_all_stickies = (destroy) ->
   # reindex
@@ -255,16 +260,15 @@ refresh_all_stickies = (destroy) ->
       unless destroy
         update_sticky(sticky)
         sticky.placeholder = placeholder(sticky)
-
-  # return
-  undefined
+  return
 
 test_for_scroll_and_offsets = ->
-  test = win.scrollTop()
-  calculate_all_stickes(test)
-  test_all_offsets(test)
-  test_on_scroll(test)
-  last_scroll = test
+  scroll_top = win.scrollTop()
+  calculate_all_stickes(scroll_top)
+  test_all_offsets(scroll_top)
+  test_on_scroll(scroll_top)
+  last_scroll = scroll_top
+  return
 
 update_everything = (destroy) ->
   # required for viewport testing
@@ -276,20 +280,18 @@ update_everything = (destroy) ->
   test_for_scroll_and_offsets()
 
 win.on 'touchmove scroll', ->
-  if stack.stickyNodes_length isnt stack.stickyNodes.length
-    stack.stickyNodes_length = stack.stickyNodes.length
-    refresh_all_stickies()
-
-  if stack.contentNodes_length isnt stack.contentNodes.length
-    stack.contentNodes_length = stack.contentNodes.length
-    calculate_all_offsets()
-
   test_for_scroll_and_offsets()
 
 win.on 'resize', ->
   update_everything()
 
-$.scrollKit = (params = {}) ->
+$.scrollKit = (params, callback) ->
+  if typeof params is 'function'
+    event_handler = params
+    params = undefined
+
+  params ?= {}
+
   if params is 'destroy'
     update_everything(true)
   else
@@ -299,12 +301,7 @@ $.scrollKit = (params = {}) ->
 
       # we prefer to use a (native) live nodeList for avoiding re-scanning
       stack.stickyNodes = document.getElementsByClassName sticky_className
-      stack.stickyNodes_length = stack.stickyNodes.length
-
       stack.contentNodes = document.getElementsByClassName content_className
-      stack.contentNodes_length = stack.contentNodes.length
 
     update_everything()
-
-  # return
-  undefined
+  return
