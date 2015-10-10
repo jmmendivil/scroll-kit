@@ -1,7 +1,13 @@
 Feature: Visible elements
 
-Scenario: First load (scrollTop: 0)
+Scenario: First load
 
   Given loaded "/"
+  When I scroll to "0"
   Then should I see "0" within "#stats .keys"
-  And should I see "0" within "#stats .scroll"
+
+Scenario: Scrolling a bit
+
+  Given loaded "/"
+  When I scroll to "1000"
+  Then should I see "0, 1" within "#stats .keys"
