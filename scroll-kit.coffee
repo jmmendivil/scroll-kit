@@ -333,6 +333,13 @@ $.scrollKit = (params, callback) ->
     update_everything()
   return
 
+$.scrollKit.update = ->
+  update_everything()
+
+$.scrollKit.destroy = ->
+  update_everything(true)
+  # TODO: detach all content-nodes
+
 $.scrollKit.scrollTo = (index, offset_top) ->
   html_element.animate
     scrollTop: stack.contentNodes[index].offset.top - (offset_top or 0)
