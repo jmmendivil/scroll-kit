@@ -16,8 +16,8 @@ stack =
 win = $(window)
 win_height = win.height()
 
-# use for directions
-body = $(document.body)
+# required for scrolling
+html_element = $('html')
 
 trigger = (type, params) ->
   return unless event_handler
@@ -26,24 +26,29 @@ trigger = (type, params) ->
   params ?= {}
   params.type = type
   params.scroll = last_scroll
+  params.direction = last_direction
 
   event_handler(params)
 
 set_classes = (name) ->
-  unless body.hasClass(name)
-    body.removeClass('backward forward static').addClass(name)
+  unless html_element.hasClass(name)
+    html_element.removeClass('backward forward static').addClass(name)
     last_direction = name
   return
 
-test_on_scroll = (offset) ->
-  unless offset
-    body.removeClass('on-scroll') if body.hasClass('on-scroll')
-  else
-    body.addClass('on-scroll') unless body.hasClass('on-scroll')
+test_on_scroll = ->
+  scroll_top = win.scrollTop()
 
-  set_classes if offset < last_scroll
+  return if last_scroll is scroll_top
+
+  unless scroll_top
+    html_element.removeClass('has-scroll') if html_element.hasClass('has-scroll')
+  else
+    html_element.addClass('has-scroll') unless html_element.hasClass('has-scroll')
+
+  set_classes if scroll_top < last_scroll
     'backward'
-  else if offset > last_scroll
+  else if scroll_top > last_scroll
     'forward'
   else
     'static'
@@ -51,10 +56,12 @@ test_on_scroll = (offset) ->
   clearTimeout static_interval
   static_interval = setTimeout ->
     set_classes('static')
-  , 200
+  , 260
+
+  last_scroll = scroll_top
 
   trigger 'tick'
-  return
+  true
 
 update_margins = (node) ->
   node.margin =
@@ -280,14 +287,9 @@ refresh_all_stickies = (destroy) ->
   return
 
 test_for_scroll_and_offsets = ->
-  scroll_top = win.scrollTop()
-
-  if last_scroll isnt scroll_top
-    last_scroll = scroll_top
-
-    calculate_all_stickes()
+  if test_on_scroll()
     test_all_offsets()
-    test_on_scroll()
+    calculate_all_stickes()
     return
 
 update_everything = (destroy) ->
@@ -332,5 +334,7 @@ $.scrollKit = (params, callback) ->
   return
 
 $.scrollKit.scrollTo = (index, offset_top) ->
-  win.scrollTop(stack.contentNodes[index].offset.top - (offset_top or 0))
+  html_element.animate
+    scrollTop: stack.contentNodes[index].offset.top - (offset_top or 0)
+  , 260, 'swing'
   return
