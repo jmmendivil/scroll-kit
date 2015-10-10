@@ -1,8 +1,8 @@
 offsets = {}
 group_id = 0
 
-last_scroll = -1
-last_direction = ''
+last_scroll = null
+last_direction = 'initial'
 
 event_handler = null
 static_interval = null
@@ -25,14 +25,14 @@ trigger = (type, params) ->
   # common values
   params ?= {}
   params.type = type
-  params.scroll = last_scroll
-  params.direction = last_direction
+  params.scrollY = last_scroll
 
   event_handler(params)
 
 set_classes = (name) ->
   unless html_element.hasClass(name)
     html_element.removeClass('backward forward static').addClass(name)
+    trigger 'direction', { from: last_direction, to: name }
     last_direction = name
   return
 
@@ -84,8 +84,9 @@ update_offsets = (node) ->
 
 update_metrics = (i, node) ->
   fixed_bottom = (win_height - node.offset.top) + last_scroll
+  should_update = node.offset.top_from_bottom isnt fixed_bottom or node.offset.index isnt i
 
-  if node.offset.top_from_bottom isnt fixed_bottom
+  if should_update
     node.offset.index = i
     node.offset.top_from_bottom = fixed_bottom
     node.offset.top_from_top = node.offset.top - last_scroll
@@ -105,14 +106,14 @@ test_node_enter = (node) ->
   return if node.offset.bottom_from_top <= node.margin.top
 
   node.offset.is_passing = true
-  trigger 'enter', { node }
+  trigger 'enter', { node, to: last_direction }
 
 test_node_exit = (node) ->
   return unless node.offset.is_passing
   return unless (node.offset.top_from_bottom <= 0) or (node.offset.bottom_from_top <= node.margin.top)
 
   node.offset.is_passing = false
-  trigger 'exit', { node }
+  trigger 'exit', { node, to: last_direction }
 
 test_all_offsets = (scroll) ->
   for node, i in stack.contentNodes
@@ -294,7 +295,7 @@ test_for_scroll_and_offsets = ->
 
 update_everything = (destroy) ->
   # force update
-  last_scroll = -1
+  last_scroll = null
 
   # required for viewport testing
   win_height = win.height()

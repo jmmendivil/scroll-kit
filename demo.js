@@ -8,7 +8,8 @@ $(function() {
   var output = $('#stats'),
       jump = output.find('.jump'),
       keys = output.find('.keys'),
-      scroll = output.find('.scroll');
+      scroll = output.find('.scroll'),
+      from_to = output.find('.from_to');
 
   var offset_top = $('main').offset().top;
 
@@ -26,8 +27,12 @@ $(function() {
   }
 
   $.scrollKit(function(e) {
+    if (e.type === 'direction') {
+      from_to.text(e.from + ' / ' + e.to);
+    }
+
     if (e.type === 'tick') {
-      scroll.text(e.scroll);
+      scroll.text(e.scrollY);
     }
 
     if (e.type === 'update') {

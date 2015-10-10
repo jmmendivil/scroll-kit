@@ -11,6 +11,12 @@ Given loaded "$URI".
         .waitForElementVisible('body', 1000)
         .resizeWindow(800, 600).pause(50)
 
+When I stop for "$SECONDS".
+
+    (seconds) ->
+      @browser
+        .pause(parseInt(seconds, 10) * 1000)
+
 When I scroll to "$OFFSET_TOP".
 
     (offset_top) ->
