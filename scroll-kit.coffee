@@ -1,3 +1,4 @@
+offsets = {}
 group_id = 0
 
 last_scroll = -1
@@ -8,7 +9,6 @@ static_interval = null
 
 # :)
 stack =
-  offsets: {}
   stickyNodes: []
   contentNodes: []
 
@@ -19,8 +19,14 @@ win_height = win.height()
 # use for directions
 body = $(document.body)
 
-trigger = (evt, node, scroll) ->
-  event_handler?(evt, node, scroll)
+trigger = (type, params) ->
+  return unless event_handler
+
+  # common values
+  params.type = type
+  params.scroll = last_scroll
+
+  event_handler(params)
 
 set_classes = (name) ->
   unless body.hasClass(name)
@@ -58,46 +64,46 @@ update_offsets = (node) ->
     is_passing: node.offset and node.offset.is_passing
   return
 
-update_metrics = (i, node, scroll) ->
-  fixed_bottom = (win_height - node.offset.top) + scroll
+update_metrics = (i, node) ->
+  fixed_bottom = (win_height - node.offset.top) + last_scroll
 
   if node.offset.top_from_bottom isnt fixed_bottom
     node.offset.index = i
     node.offset.top_from_bottom = fixed_bottom
-    node.offset.top_from_top = node.offset.top - scroll
+    node.offset.top_from_top = node.offset.top - last_scroll
     node.offset.bottom_from_bottom = fixed_bottom - node.offset.height
-    node.offset.bottom_from_top = (node.offset.height - scroll) + node.offset.top
+    node.offset.bottom_from_top = (node.offset.height - last_scroll) + node.offset.top
     true
 
-test_node_passing = (node, scroll) ->
-  trigger('passing', node, scroll) if node.offset.is_passing
+test_node_passing = (node) ->
+  trigger('passing', { node }) if node.offset.is_passing
 
-test_node_scroll = (node, scroll) ->
-  trigger 'scroll', node, scroll
+test_node_scroll = (node) ->
+  trigger 'scroll', { node }
 
-test_node_enter = (node, scroll) ->
+test_node_enter = (node) ->
   return if node.offset.is_passing
   return if node.offset.top_from_bottom <= 0
   return if node.offset.bottom_from_top <= 0
 
   node.offset.is_passing = true
-  trigger 'enter', node, scroll
+  trigger 'enter', { node }
 
-test_node_exit = (node, scroll) ->
+test_node_exit = (node) ->
   return unless node.offset.is_passing
   return unless (node.offset.top_from_bottom <= 0) or (node.offset.bottom_from_top <= 0)
 
   node.offset.is_passing = false
-  trigger 'exit', node, scroll
+  trigger 'exit', { node }
 
 test_all_offsets = (scroll) ->
   for node, i in stack.contentNodes
-    if update_metrics(i, node, scroll)
+    if update_metrics(i, node)
       # im not sure if the order is right?
-      test_node_scroll(node, scroll)
-      test_node_enter(node, scroll)
-      test_node_exit(node, scroll)
-      test_node_passing(node, scroll)
+      test_node_scroll(node)
+      test_node_enter(node)
+      test_node_exit(node)
+      test_node_passing(node)
   return
 
 calculate_all_offsets = ->
@@ -115,16 +121,16 @@ placeholder = (node) ->
   $('<div/>').css(fixed).css('display', 'none').insertBefore(node.el)
 
 update_sticky = (node) ->
-  unless stack.offsets[node.data.group]
-    stack.offsets[node.data.group] = node.data.offset or 0
+  unless offsets[node.data.group]
+    offsets[node.data.group] = node.data.offset or 0
 
-  node.offset_top = stack.offsets[node.data.group]
+  node.offset_top = offsets[node.data.group]
 
   # original value
   node.orig_height = node.el.outerHeight(true)
 
   # increment the node offset_top based on current group/stack
-  stack.offsets[node.data.group] += node.orig_height unless node.isFloat
+  offsets[node.data.group] += node.orig_height unless node.isFloat
 
   return true if node.isFixed
 
@@ -182,9 +188,9 @@ initialize_sticky = (node) ->
   node.placeholder = placeholder(node) if update_sticky(node)
   return
 
-check_if_fit = (sticky, scroll) ->
+check_if_fit = (sticky) ->
   if sticky.data.fit
-    fitted_top = win_height + scroll - sticky.offset_top
+    fitted_top = win_height + last_scroll - sticky.offset_top
 
     if fitted_top >= sticky.passing_top
       sticky.el.addClass('fit') unless sticky.el.hasClass('fit')
@@ -192,7 +198,7 @@ check_if_fit = (sticky, scroll) ->
     else
       sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
 
-check_if_can_stick = (sticky, scroll) ->
+check_if_can_stick = (sticky) ->
   unless sticky.el.hasClass('stuck')
     if sticky.placeholder
       sticky.placeholder.css('display', sticky.display)
@@ -205,7 +211,7 @@ check_if_can_stick = (sticky, scroll) ->
       top: sticky.offset_top
       bottom: 0 if sticky.data.fit
 
-check_if_can_unstick = (sticky, scroll) ->
+check_if_can_unstick = (sticky) ->
   if sticky.el.hasClass('stuck')
     if sticky.placeholder
       sticky.placeholder.css('display', 'none')
@@ -232,22 +238,22 @@ calculate_all_stickes = (scroll) ->
   for sticky in stack.stickyNodes
     continue if sticky.isFixed
 
-    if scroll <= sticky.passing_top
-      check_if_can_unstick(sticky, scroll)
+    if last_scroll <= sticky.passing_top
+      check_if_can_unstick(sticky)
     else
-      check_if_can_stick(sticky, scroll)
+      check_if_can_stick(sticky)
 
-      if (scroll + sticky.passing_height) >= sticky.passing_bottom
+      if (last_scroll + sticky.passing_height) >= sticky.passing_bottom
         check_if_can_bottom(sticky)
       else
         check_if_can_unbottom(sticky)
 
-    check_if_fit(sticky, scroll)
+    check_if_fit(sticky)
   return
 
 refresh_all_stickies = (destroy) ->
   # reindex
-  stack.offsets = {}
+  offsets = {}
 
   # detach destroyed stickies
   for sticky in stack.stickyNodes
@@ -264,13 +270,19 @@ refresh_all_stickies = (destroy) ->
 
 test_for_scroll_and_offsets = ->
   scroll_top = win.scrollTop()
-  calculate_all_stickes(scroll_top)
-  test_all_offsets(scroll_top)
-  test_on_scroll(scroll_top)
-  last_scroll = scroll_top
-  return
+
+  if last_scroll isnt scroll_top
+    last_scroll = scroll_top
+
+    calculate_all_stickes()
+    test_all_offsets()
+    test_on_scroll()
+    return
 
 update_everything = (destroy) ->
+  # force update
+  last_scroll = -1
+
   # required for viewport testing
   win_height = win.height()
 
@@ -278,6 +290,8 @@ update_everything = (destroy) ->
 
   calculate_all_offsets()
   test_for_scroll_and_offsets()
+
+  trigger 'update', { stack }
 
 win.on 'touchmove scroll', ->
   test_for_scroll_and_offsets()
