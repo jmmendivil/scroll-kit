@@ -327,3 +327,7 @@ $.scrollKit = (params, callback) ->
 
     update_everything()
   return
+
+$.scrollKit.scrollTo = (index, offset_top) ->
+  win.scrollTop(stack.contentNodes[index].offset.top - (offset_top or 0))
+  return

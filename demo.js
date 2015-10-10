@@ -3,8 +3,7 @@
 /* global $ */
 
 $(function() {
-  var stack = {},
-      visible = [];
+  var visible = [];
 
   var output = $('#stats'),
       jump = output.find('.jump'),
@@ -13,9 +12,7 @@ $(function() {
   var offset_top = $('main').offset().top;
 
   jump.on('change', function() {
-    var node = stack.contentNodes[jump.val()];
-
-    window.scrollTo(window.scrollX, node.offset.top - offset_top);
+    $.scrollKit.scrollTo(jump.val(), offset_top);
   });
 
   function render() {
@@ -30,8 +27,6 @@ $(function() {
   $.scrollKit(function(e) {
     if (e.type === 'update') {
       jump.empty();
-
-      stack = e.stack;
 
       var index = 0,
           length = e.stack.contentNodes.length;
