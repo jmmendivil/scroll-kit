@@ -15,7 +15,7 @@ $(function() {
   jump.on('change', function() {
     var node = stack.contentNodes[jump.val()];
 
-    window.scrollBy(window.scrollX, node.offset.top - offset_top);
+    window.scrollTo(window.scrollX, node.offset.top - offset_top);
   });
 
   function render() {
