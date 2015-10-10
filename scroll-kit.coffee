@@ -23,6 +23,7 @@ trigger = (type, params) ->
   return unless event_handler
 
   # common values
+  params ?= {}
   params.type = type
   params.scroll = last_scroll
 
@@ -51,6 +52,8 @@ test_on_scroll = (offset) ->
   static_interval = setTimeout ->
     set_classes('static')
   , 200
+
+  trigger 'tick'
   return
 
 update_margins = (node) ->
