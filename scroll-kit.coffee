@@ -53,6 +53,11 @@ test_on_scroll = (offset) ->
   , 200
   return
 
+update_margins = (node) ->
+  node.margin =
+    top: parseInt(node.el.css('margin-top'), 10)
+  return
+
 update_offsets = (node) ->
   # store a jQuery reference due its usefulness D:
   node.el = $(node) unless node.el
@@ -62,6 +67,9 @@ update_offsets = (node) ->
     top: node.el.offset().top
     height: node.el.outerHeight(true)
     is_passing: node.offset and node.offset.is_passing
+
+  # used for additional calculations
+  update_margins(node)
   return
 
 update_metrics = (i, node) ->
@@ -84,14 +92,14 @@ test_node_scroll = (node) ->
 test_node_enter = (node) ->
   return if node.offset.is_passing
   return if node.offset.top_from_bottom <= 0
-  return if node.offset.bottom_from_top <= 0
+  return if node.offset.bottom_from_top <= node.margin.top
 
   node.offset.is_passing = true
   trigger 'enter', { node }
 
 test_node_exit = (node) ->
   return unless node.offset.is_passing
-  return unless (node.offset.top_from_bottom <= 0) or (node.offset.bottom_from_top <= 0)
+  return unless (node.offset.top_from_bottom <= 0) or (node.offset.bottom_from_top <= node.margin.top)
 
   node.offset.is_passing = false
   trigger 'exit', { node }
