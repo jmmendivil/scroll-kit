@@ -21,7 +21,7 @@ $(function() {
   function render() {
     var indexes = visible.map(function(node) {
       return node.offset.index;
-    });
+    }).sort();
 
     keys.text(indexes.join(', '));
     jump.val(indexes[0]);
