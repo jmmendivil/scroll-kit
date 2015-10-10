@@ -7,7 +7,8 @@ $(function() {
 
   var output = $('#stats'),
       jump = output.find('.jump'),
-      keys = output.find('.keys');
+      keys = output.find('.keys'),
+      scroll = output.find('.scroll');
 
   var offset_top = $('main').offset().top;
 
@@ -25,6 +26,10 @@ $(function() {
   }
 
   $.scrollKit(function(e) {
+    if (e.type === 'tick') {
+      scroll.text(e.scroll);
+    }
+
     if (e.type === 'update') {
       jump.empty();
 
