@@ -3,33 +3,53 @@
 /* global $ */
 
 $(function() {
-  var visible = [];
+  var stack = {},
+      visible = [];
 
-  var output = $('#stats');
+  var output = $('#stats'),
+      jump = output.find('.jump'),
+      keys = output.find('.keys');
+
+  var offset_top = $('main').offset().top;
+
+  jump.on('change', function() {
+    var node = stack.contentNodes[jump.val()];
+
+    $(window).scrollTop(node.offset.top - offset_top);
+  });
 
   function render() {
     var indexes = visible.map(function(node) {
       return node.offset.index;
     });
 
-    output.html([
-      '<h3>Visible content</h3>',
-      '<ul>',
-      '<li>Indexes: ', indexes.join(', '), '</li>',
-      '<li>Elements: ', indexes.length, '</li>',
-      '</ul>'
-    ].join(''));
+    keys.text(indexes.join(', '));
+    jump.val(indexes[0]);
   }
 
-  $.scrollKit(function(evt, node) {
-    if (evt === 'enter') {
-      visible.push(node);
+  $.scrollKit(function(e) {
+    if (e.type === 'update') {
+      jump.empty();
+
+      stack = e.stack;
+
+      var index = 0,
+          length = e.stack.contentNodes.length;
+
+      while (index < length) {
+        jump.append('<option value="' + index + '">' + index + '</option>');
+        index += 1;
+      }
+    }
+
+    if (e.type === 'enter') {
+      visible.push(e.node);
       render();
     }
 
-    if (evt === 'exit') {
+    if (e.type === 'exit') {
       visible = visible.filter(function(old) {
-        return old.offset.index !== node.offset.index;
+        return old.offset.index !== e.node.offset.index;
       });
       render();
     }
