@@ -11,4 +11,4 @@ before_script:
 - npm install -g nahual
 script:
 - 'npm run lint'
-- 'nahual -sS'
+- 'nahual -S --target saucelabs'

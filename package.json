@@ -1,7 +1,7 @@
 {
   "name": "scroll-kit",
   "version": "0.0.0",
-  "description": "Stick elements to the viewport",
+  "description": "Take care of your elements on the viewport",
   "main": "scroll-kit.js",
   "scripts": {
     "dev": "./node_modules/coffee-script/bin/coffee --watch --output . --compile *.coffee",
