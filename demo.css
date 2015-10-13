@@ -9,6 +9,10 @@ p { padding: 10px; }
 section { border: 1px solid #DDDDDD; background: #FFFFFF; }
 section ~ section { margin-top: 10px; }
 
+.row { display: table; }
+.row > .cell { display: table-cell; vertical-align: top; }
+.three.column.row > .cell { width: 33.3%; }
+
 .left { float: left; }
 .right { float: right; }
 .sidebar { max-width: 45%; overflow: auto; }
@@ -23,9 +27,10 @@ section ~ section { margin-top: 10px; }
 .is-sticky { background: #EEEEEE; }
 
 #stats {
-  border-right: 1px solid #DDDDDD;
-  border-bottom: 1px solid #DDDDDD;
-  background: #FFFFFF;
+  border-radius: 0 0 5px 0;
+  background: rgba(0, 0, 0, .6);
+  color: #FFFFFF;
+  text-shadow: 1px 1px 1px #000000;
   position: fixed;
   padding: 10px;
   left: 0;
