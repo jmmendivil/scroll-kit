@@ -1,3 +1,5 @@
+version = '0.1.0'
+
 offsets = {}
 group_id = 0
 
