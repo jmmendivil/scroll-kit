@@ -1,5 +1,3 @@
-version = '0.1.0'
-
 offsets = {}
 group_id = 0
 
@@ -47,6 +45,9 @@ debug =
 
   info: (key) ->
     debug.cached[key] or (debug.cached[key] = debug.element.find(".#{key}"))
+
+debug.info('jump').on 'change', (e) ->
+  $.scrollKit.scrollTo(e.target.selectedIndex, stack.offsetTop)
 
 trigger = (type, params) ->
   return unless event_handler
@@ -409,6 +410,8 @@ $.scrollKit = (params, callback) ->
 
     update_everything()
   return
+
+$.scrollKit.version = '0.1.0'
 
 $.scrollKit.debug = (state) ->
   debug.is_enabled = !!state
