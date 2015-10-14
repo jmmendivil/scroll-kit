@@ -8,7 +8,7 @@ event_handler = null
 static_interval = null
 
 # :)
-stack =
+state =
   gap:
     offset: -1
     nearest: null
@@ -47,7 +47,8 @@ debug =
     debug.cached[key] or (debug.cached[key] = debug.element.find(".#{key}"))
 
 debug.info('jump').on 'change', (e) ->
-  $.scrollKit.scrollTo(e.target.selectedIndex, stack.offsetTop)
+  return unless debug.is_enabled
+  $.scrollKit.scrollTo(e.target.selectedIndex, state.offsetTop)
 
 trigger = (type, params) ->
   return unless event_handler
@@ -133,12 +134,12 @@ update_metrics = (i, node) ->
 test_node_passing = (node) ->
   return unless node.offset.is_passing
 
-  if stack.gap.offset > 0
-    test_bottom = node.offset.bottom_from_top >= stack.gap.offset
-    test_top = node.offset.top_from_top <= stack.gap.offset
+  if state.gap.offset > 0
+    test_bottom = node.offset.bottom_from_top >= state.gap.offset
+    test_top = node.offset.top_from_top <= state.gap.offset
 
-    if test_top and test_bottom and (stack.gap.nearest isnt node.offset.index)
-      stack.gap.nearest = node.offset.index
+    if test_top and test_bottom and (state.gap.nearest isnt node.offset.index)
+      state.gap.nearest = node.offset.index
 
       if debug.is_enabled
         debug.info('jump').val(node.offset.index)
@@ -155,11 +156,11 @@ test_node_enter = (node) ->
 
   node.offset.is_passing = true
 
-  stack.visibleIndexes.push node.offset.index
-  stack.visibleIndexes.sort()
+  state.visibleIndexes.push node.offset.index
+  state.visibleIndexes.sort()
 
   if debug.is_enabled
-    debug.info('keys').text(stack.visibleIndexes.join(', '))
+    debug.info('keys').text(state.visibleIndexes.join(', '))
 
   trigger 'enter', { node, to: last_direction }
 
@@ -169,17 +170,17 @@ test_node_exit = (node) ->
 
   node.offset.is_passing = false
 
-  stack.visibleIndexes = stack.visibleIndexes
+  state.visibleIndexes = state.visibleIndexes
     .filter((old) -> old isnt node.offset.index)
     .sort()
 
   if debug.is_enabled
-    debug.info('keys').text(stack.visibleIndexes.join(', '))
+    debug.info('keys').text(state.visibleIndexes.join(', '))
 
   trigger 'exit', { node, to: last_direction }
 
 test_all_offsets = (scroll) ->
-  for node, i in stack.contentNodes
+  for node, i in state.contentNodes
     if update_metrics(i, node)
       # im not sure if the order is right?
       test_node_scroll(node)
@@ -189,7 +190,7 @@ test_all_offsets = (scroll) ->
   return
 
 calculate_all_offsets = ->
-  update_offsets(node) for node in stack.contentNodes
+  update_offsets(node) for node in state.contentNodes
   return
 
 placeholder = (node) ->
@@ -317,7 +318,7 @@ check_if_can_unbottom = (sticky) ->
       top: sticky.offset_top
 
 calculate_all_stickes = (scroll) ->
-  for sticky in stack.stickyNodes
+  for sticky in state.stickyNodes
     continue if sticky.isFixed
 
     if last_scroll <= sticky.passing_top
@@ -338,7 +339,7 @@ refresh_all_stickies = (destroy) ->
   offsets = {}
 
   # detach destroyed stickies
-  for sticky in stack.stickyNodes
+  for sticky in state.stickyNodes
     unless sticky.el
       initialize_sticky(sticky)
     else
@@ -369,9 +370,8 @@ update_everything = (destroy) ->
   test_for_scroll_and_offsets()
 
   if debug.is_enabled
-    debug.info('jump').html ("<option>#{i - 1}</option>" for i in [1..stack.contentNodes.length])
-
-  trigger 'update', { stack }
+    debug.info('jump').html ("<option>#{i - 1}</option>" for i in [1..state.contentNodes.length])
+  return
 
 win.on 'touchmove scroll', ->
   test_for_scroll_and_offsets()
@@ -392,12 +392,12 @@ $.scrollKit = (params, callback) ->
     unless params is 'update'
       $.scrollKit.debug(params.debug)
 
-      stack.offsetTop = +params.top if params.top >= 0
-      stack.gap.offset = +params.gap if params.gap >= 0
+      state.offsetTop = +params.top if params.top >= 0
+      state.gap.offset = +params.gap if params.gap >= 0
 
       if debug.is_enabled
-        debug.info('gap').css 'top', if stack.gap.offset >= 0
-          stack.gap.offset
+        debug.info('gap').css 'top', if state.gap.offset >= 0
+          state.gap.offset
         else
           -1
 
@@ -405,8 +405,8 @@ $.scrollKit = (params, callback) ->
       content_className = params.contentClassName or 'is-content'
 
       # we prefer to use a (native) live nodeList for avoiding re-scanning
-      stack.stickyNodes = document.getElementsByClassName sticky_className
-      stack.contentNodes = document.getElementsByClassName content_className
+      state.stickyNodes = document.getElementsByClassName sticky_className
+      state.contentNodes = document.getElementsByClassName content_className
 
     update_everything()
   return
@@ -427,7 +427,7 @@ $.scrollKit.destroy = ->
 
 $.scrollKit.scrollTo = (index, offset_top) ->
   html_element.animate
-    scrollTop: stack.contentNodes[index].offset.top - (offset_top or 0)
+    scrollTop: state.contentNodes[index].offset.top - (offset_top or 0)
   , 260, 'swing'
   return
 
