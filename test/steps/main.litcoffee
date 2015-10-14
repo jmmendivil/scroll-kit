@@ -22,7 +22,7 @@ When I scroll to "$OFFSET_TOP".
     (offset_top) ->
       @browser
         .execute("scrollTo(0,#{offset_top})")
-        .expect.element('#stats .scroll').text.to.contain(offset_top)
+        .expect.element('#scroll-kit-info .scroll').text.to.equal(offset_top)
 
 $VERB should I see "$TEXT" within "$SELECTOR".
 
