@@ -4,7 +4,8 @@
   "description": "Take care of your elements on the viewport",
   "main": [
     "scroll-kit.js",
-    "scroll-kit.css"
+    "scroll-kit.css",
+    "jquery-velcro.js"
   ],
   "dependencies": {
     "jquery": "~2.1.4"
