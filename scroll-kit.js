@@ -425,7 +425,7 @@
           results.push("<option>" + (i - 1) + "</option>");
         }
         return results;
-      })());
+      })()).val(state.gap.nearest);
     }
   };
 

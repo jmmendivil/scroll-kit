@@ -379,7 +379,9 @@ update_everything = (destroy) ->
   test_for_scroll_and_offsets()
 
   if debug.is_enabled
-    debug.info('jump').html ("<option>#{i - 1}</option>" for i in [1..state.contentNodes.length])
+    debug.info('jump')
+      .html(("<option>#{i - 1}</option>" for i in [1..state.contentNodes.length]))
+      .val state.gap.nearest
   return
 
 win.on 'touchmove scroll', ->
