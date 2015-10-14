@@ -55,6 +55,7 @@
       params = {};
     }
     params.type = type;
+    params.from = last_direction;
     params.scrollY = last_scroll;
     return event_handler(params);
   };
@@ -66,7 +67,6 @@
         debug.info('from_to').text(last_direction + ' / ' + name);
       }
       trigger('direction', {
-        from: last_direction,
         to: name
       });
       last_direction = name;
@@ -176,8 +176,7 @@
       debug.info('keys').text(state.visibleIndexes.join(', '));
     }
     return trigger('enter', {
-      node: node,
-      to: last_direction
+      node: node
     });
   };
 
@@ -196,8 +195,7 @@
       debug.info('keys').text(state.visibleIndexes.join(', '));
     }
     return trigger('exit', {
-      node: node,
-      to: last_direction
+      node: node
     });
   };
 
@@ -440,7 +438,11 @@
     var content_className, sticky_className;
     if (typeof params === 'function') {
       event_handler = params;
-      params = void 0;
+      params = callback;
+      callback = null;
+    }
+    if (typeof callback === 'function') {
+      event_handler = callback;
     }
     if (params == null) {
       params = {};
@@ -470,9 +472,12 @@
 
   $.scrollKit.version = '0.1.0';
 
-  $.scrollKit.debug = function(state) {
-    debug.is_enabled = !!state;
-    debug.element[state ? 'show' : 'hide']();
+  $.scrollKit.debug = function(enabled) {
+    if (enabled == null) {
+      enabled = true;
+    }
+    debug.is_enabled = !!enabled;
+    debug.element[enabled ? 'show' : 'hide']();
   };
 
   $.scrollKit.update = function() {

@@ -56,6 +56,7 @@ trigger = (type, params) ->
   # common values
   params ?= {}
   params.type = type
+  params.from = last_direction
   params.scrollY = last_scroll
 
   event_handler(params)
@@ -67,7 +68,7 @@ set_classes = (name) ->
     if debug.is_enabled
       debug.info('from_to').text(last_direction + ' / ' + name)
 
-    trigger 'direction', { from: last_direction, to: name }
+    trigger 'direction', { to: name }
     last_direction = name
   return
 
@@ -162,7 +163,7 @@ test_node_enter = (node) ->
   if debug.is_enabled
     debug.info('keys').text(state.visibleIndexes.join(', '))
 
-  trigger 'enter', { node, to: last_direction }
+  trigger 'enter', { node }
 
 test_node_exit = (node) ->
   return unless node.offset.is_passing
@@ -177,7 +178,7 @@ test_node_exit = (node) ->
   if debug.is_enabled
     debug.info('keys').text(state.visibleIndexes.join(', '))
 
-  trigger 'exit', { node, to: last_direction }
+  trigger 'exit', { node }
 
 test_all_offsets = (scroll) ->
   for node, i in state.contentNodes
@@ -382,7 +383,11 @@ win.on 'resize', ->
 $.scrollKit = (params, callback) ->
   if typeof params is 'function'
     event_handler = params
-    params = undefined
+    params = callback
+    callback = null
+
+  if typeof callback is 'function'
+    event_handler = callback
 
   params ?= {}
 
@@ -413,9 +418,9 @@ $.scrollKit = (params, callback) ->
 
 $.scrollKit.version = '0.1.0'
 
-$.scrollKit.debug = (state) ->
-  debug.is_enabled = !!state
-  debug.element[if state then 'show' else 'hide']()
+$.scrollKit.debug = (enabled = true) ->
+  debug.is_enabled = !!enabled
+  debug.element[if enabled then 'show' else 'hide']()
   return
 
 $.scrollKit.update = ->
