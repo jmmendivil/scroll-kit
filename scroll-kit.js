@@ -113,7 +113,7 @@
     }
     node.offset = {
       top: node.el.offset().top,
-      height: node.el.outerHeight(true),
+      height: node.el.outerHeight(),
       is_passing: node.offset && node.offset.is_passing
     };
     update_margins(node);
@@ -129,6 +129,8 @@
       node.offset.top_from_top = node.offset.top - last_scroll;
       node.offset.bottom_from_bottom = fixed_bottom - node.offset.height;
       node.offset.bottom_from_top = (node.offset.height - last_scroll) + node.offset.top;
+      node.offset.top_from_gap = state.gap.offset - node.offset.top_from_top;
+      node.offset.bottom_from_gap = node.offset.top_from_top - state.gap.offset + node.offset.height;
       return true;
     }
   };
@@ -138,15 +140,16 @@
     if (!node.offset.is_passing) {
       return;
     }
-    if (state.gap.offset > 0) {
-      test_bottom = node.offset.bottom_from_top >= state.gap.offset;
-      test_top = node.offset.top_from_top <= state.gap.offset;
-      if (test_top && test_bottom && (state.gap.nearest !== node.offset.index)) {
-        state.gap.nearest = node.offset.index;
-        if (debug.is_enabled) {
-          debug.info('jump').val(node.offset.index);
-        }
+    test_bottom = node.offset.bottom_from_top >= state.gap.offset;
+    test_top = node.offset.top_from_top <= state.gap.offset;
+    if (test_top && test_bottom && (state.gap.nearest !== node.offset.index)) {
+      state.gap.nearest = node.offset.index;
+      if (debug.is_enabled) {
+        debug.info('jump').val(node.offset.index);
       }
+      trigger('nearest', {
+        node: node
+      });
     }
     return trigger('passing', {
       node: node
@@ -240,7 +243,7 @@
       offsets[node.data.group] = node.data.offset || 0;
     }
     node.offset_top = offsets[node.data.group];
-    node.orig_height = node.el.outerHeight(true);
+    node.orig_height = node.el.outerHeight();
     if (!node.isFloat) {
       offsets[node.data.group] += node.orig_height;
     }
@@ -452,14 +455,10 @@
     } else {
       if (params !== 'update') {
         $.scrollKit.debug(params.debug);
-        if (params.top >= 0) {
-          state.offsetTop = +params.top;
-        }
-        if (params.gap >= 0) {
-          state.gap.offset = +params.gap;
-        }
+        state.offsetTop = params.top ? +params.top || 0 + params.top : void 0;
+        state.gap.offset = params.gap ? +params.gap || 0 + params.gap : void 0;
         if (debug.is_enabled) {
-          debug.info('gap').css('top', state.gap.offset >= 0 ? state.gap.offset : -1);
+          debug.info('gap').css('top', state.gap.offset);
         }
         sticky_className = params.stickyClassName || 'is-sticky';
         content_className = params.contentClassName || 'is-content';

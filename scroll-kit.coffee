@@ -113,7 +113,7 @@ update_offsets = (node) ->
   # liveNodes are also providing live storage for free!
   node.offset =
     top: node.el.offset().top
-    height: node.el.outerHeight(true)
+    height: node.el.outerHeight()
     is_passing: node.offset and node.offset.is_passing
 
   # used for additional calculations
@@ -130,20 +130,24 @@ update_metrics = (i, node) ->
     node.offset.top_from_top = node.offset.top - last_scroll
     node.offset.bottom_from_bottom = fixed_bottom - node.offset.height
     node.offset.bottom_from_top = (node.offset.height - last_scroll) + node.offset.top
+
+    node.offset.top_from_gap = state.gap.offset - node.offset.top_from_top
+    node.offset.bottom_from_gap = node.offset.top_from_top - state.gap.offset + node.offset.height
     true
 
 test_node_passing = (node) ->
   return unless node.offset.is_passing
 
-  if state.gap.offset > 0
-    test_bottom = node.offset.bottom_from_top >= state.gap.offset
-    test_top = node.offset.top_from_top <= state.gap.offset
+  test_bottom = node.offset.bottom_from_top >= state.gap.offset
+  test_top = node.offset.top_from_top <= state.gap.offset
 
-    if test_top and test_bottom and (state.gap.nearest isnt node.offset.index)
-      state.gap.nearest = node.offset.index
+  if test_top and test_bottom and (state.gap.nearest isnt node.offset.index)
+    state.gap.nearest = node.offset.index
 
-      if debug.is_enabled
-        debug.info('jump').val(node.offset.index)
+    if debug.is_enabled
+      debug.info('jump').val(node.offset.index)
+
+    trigger 'nearest', { node }
 
   trigger 'passing', { node }
 
@@ -211,7 +215,7 @@ update_sticky = (node) ->
   node.offset_top = offsets[node.data.group]
 
   # original value
-  node.orig_height = node.el.outerHeight(true)
+  node.orig_height = node.el.outerHeight()
 
   # increment the node offset_top based on current group/stack
   offsets[node.data.group] += node.orig_height unless node.isFloat
@@ -397,14 +401,11 @@ $.scrollKit = (params, callback) ->
     unless params is 'update'
       $.scrollKit.debug(params.debug)
 
-      state.offsetTop = +params.top if params.top >= 0
-      state.gap.offset = +params.gap if params.gap >= 0
+      state.offsetTop = if params.top then +params.top or 0 +params.top
+      state.gap.offset = if params.gap then +params.gap or 0 +params.gap
 
       if debug.is_enabled
-        debug.info('gap').css 'top', if state.gap.offset >= 0
-          state.gap.offset
-        else
-          -1
+        debug.info('gap').css 'top', state.gap.offset
 
       sticky_className = params.stickyClassName or 'is-sticky'
       content_className = params.contentClassName or 'is-content'
@@ -422,6 +423,8 @@ $.scrollKit.debug = (enabled = true) ->
   debug.is_enabled = !!enabled
   debug.element[if enabled then 'show' else 'hide']()
   return
+
+# $.scrollKit.recalc()
 
 $.scrollKit.update = ->
   update_everything()
