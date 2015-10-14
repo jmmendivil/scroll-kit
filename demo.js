@@ -3,6 +3,18 @@
 /* global $ */
 
 $(function() {
+  var gap = 200,
+      gap_index = -1;
+
+  $('<div/>').css({
+    width: '100%',
+    height: '1px',
+    position: 'fixed',
+    borderBottom: '1px dotted red',
+    left: 0,
+    top: gap
+  }).appendTo('body');
+
   var visible = [];
 
   var output = $('#stats'),
@@ -23,7 +35,6 @@ $(function() {
     }).sort();
 
     keys.text(indexes.join(', '));
-    jump.val(indexes[0]);
   }
 
   $.scrollKit(function(e) {
@@ -44,6 +55,19 @@ $(function() {
       while (index < length) {
         jump.append('<option value="' + index + '">' + index + '</option>');
         index += 1;
+      }
+    }
+
+    if (e.type === 'passing') {
+      var fixed_bottom = e.node.offset.bottom_from_top >= gap,
+          fixed_top = e.node.offset.top_from_top <= gap;
+
+      if (fixed_top && fixed_bottom && (gap_index !== e.node.offset.index)) {
+        gap_index = e.node.offset.index;
+
+        setTimeout(function() {
+          jump.val(gap_index);
+        });
       }
     }
 
