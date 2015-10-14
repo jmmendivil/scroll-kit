@@ -120,7 +120,7 @@
   };
 
   update_metrics = function(i, node) {
-    var fixed_bottom, should_update;
+    var fixed_bottom, should_update, test_bottom, test_top;
     fixed_bottom = (win_height - node.offset.top) + last_scroll;
     should_update = node.offset.top_from_bottom !== fixed_bottom || node.offset.index !== i;
     if (should_update) {
@@ -131,18 +131,18 @@
       node.offset.bottom_from_top = (node.offset.height - last_scroll) + node.offset.top;
       node.offset.top_from_gap = state.gap.offset - node.offset.top_from_top;
       node.offset.bottom_from_gap = node.offset.top_from_top - state.gap.offset + node.offset.height;
+      test_bottom = node.offset.bottom_from_top >= state.gap.offset;
+      test_top = node.offset.top_from_top <= state.gap.offset;
+      node.offset.is_nearest = test_top && test_bottom;
       return true;
     }
   };
 
   test_node_passing = function(node) {
-    var test_bottom, test_top;
     if (!node.offset.is_passing) {
       return;
     }
-    test_bottom = node.offset.bottom_from_top >= state.gap.offset;
-    test_top = node.offset.top_from_top <= state.gap.offset;
-    if (test_top && test_bottom && (state.gap.nearest !== node.offset.index)) {
+    if (node.offset.is_nearest && (state.gap.nearest !== node.offset.index)) {
       state.gap.nearest = node.offset.index;
       if (debug.is_enabled) {
         debug.info('jump').val(node.offset.index);

@@ -126,22 +126,26 @@ update_metrics = (i, node) ->
 
   if should_update
     node.offset.index = i
+
     node.offset.top_from_bottom = fixed_bottom
     node.offset.top_from_top = node.offset.top - last_scroll
+
     node.offset.bottom_from_bottom = fixed_bottom - node.offset.height
     node.offset.bottom_from_top = (node.offset.height - last_scroll) + node.offset.top
 
     node.offset.top_from_gap = state.gap.offset - node.offset.top_from_top
     node.offset.bottom_from_gap = node.offset.top_from_top - state.gap.offset + node.offset.height
+
+    test_bottom = node.offset.bottom_from_top >= state.gap.offset
+    test_top = node.offset.top_from_top <= state.gap.offset
+
+    node.offset.is_nearest = test_top and test_bottom
     true
 
 test_node_passing = (node) ->
   return unless node.offset.is_passing
 
-  test_bottom = node.offset.bottom_from_top >= state.gap.offset
-  test_top = node.offset.top_from_top <= state.gap.offset
-
-  if test_top and test_bottom and (state.gap.nearest isnt node.offset.index)
+  if node.offset.is_nearest and (state.gap.nearest isnt node.offset.index)
     state.gap.nearest = node.offset.index
 
     if debug.is_enabled
