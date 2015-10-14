@@ -26,21 +26,6 @@ section ~ section { margin-top: 10px; }
 
 .is-sticky { background: #EEEEEE; }
 
-#stats {
-  border-radius: 0 0 5px 0;
-  background: rgba(0, 0, 0, .6);
-  color: #FFFFFF;
-  text-shadow: 1px 1px 1px #000000;
-  position: fixed;
-  padding: 10px;
-  left: 0;
-  top: 0;
-  z-index: 1;
-  font-size: 13px;
-}
-
-#stats label { line-height: 20px; }
-
 @media screen and (min-width: 798px) {
   main { width: 768px; margin: 10px auto; }
 

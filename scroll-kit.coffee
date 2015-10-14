@@ -11,8 +11,16 @@ static_interval = null
 
 # :)
 stack =
+  gap:
+    offset: -1
+    nearest: null
+
+  offsetTop: 0
+
   stickyNodes: []
   contentNodes: []
+
+  visibleIndexes: []
 
 # cached
 win = $(window)
@@ -20,6 +28,25 @@ win_height = win.height()
 
 # required for scrolling
 html_element = $('html')
+
+# ;-)
+debug =
+  is_enabled: false
+
+  element: $('''
+    <div id="scroll-kit-info">
+      <span class="gap"></span>
+      <label>Indexes: <span class="keys"></span></label>
+      <label>ScrollY: <span class="scroll"></span></label>
+      <label>ScrollTo: <select class="jump"></select></label>
+      <label>Direction: <span class="from_to"></span></label>
+    </div>
+  ''').hide().appendTo 'body'
+
+  cached: {}
+
+  info: (key) ->
+    debug.cached[key] or (debug.cached[key] = debug.element.find(".#{key}"))
 
 trigger = (type, params) ->
   return unless event_handler
@@ -34,6 +61,10 @@ trigger = (type, params) ->
 set_classes = (name) ->
   unless html_element.hasClass(name)
     html_element.removeClass('backward forward static').addClass(name)
+
+    if debug.is_enabled
+      debug.info('from_to').text(last_direction + ' / ' + name)
+
     trigger 'direction', { from: last_direction, to: name }
     last_direction = name
   return
@@ -60,8 +91,10 @@ test_on_scroll = ->
     set_classes('static')
   , 260
 
-  last_scroll = scroll_top
+  if debug.is_enabled
+    debug.info('scroll').text(scroll_top)
 
+  last_scroll = scroll_top
   trigger 'tick'
   true
 
@@ -97,7 +130,19 @@ update_metrics = (i, node) ->
     true
 
 test_node_passing = (node) ->
-  trigger('passing', { node }) if node.offset.is_passing
+  return unless node.offset.is_passing
+
+  if stack.gap.offset > 0
+    test_bottom = node.offset.bottom_from_top >= stack.gap.offset
+    test_top = node.offset.top_from_top <= stack.gap.offset
+
+    if test_top and test_bottom and (stack.gap.nearest isnt node.offset.index)
+      stack.gap.nearest = node.offset.index
+
+      if debug.is_enabled
+        debug.info('jump').val(node.offset.index)
+
+  trigger 'passing', { node }
 
 test_node_scroll = (node) ->
   trigger 'scroll', { node }
@@ -108,6 +153,13 @@ test_node_enter = (node) ->
   return if node.offset.bottom_from_top <= node.margin.top
 
   node.offset.is_passing = true
+
+  stack.visibleIndexes.push node.offset.index
+  stack.visibleIndexes.sort()
+
+  if debug.is_enabled
+    debug.info('keys').text(stack.visibleIndexes.join(', '))
+
   trigger 'enter', { node, to: last_direction }
 
 test_node_exit = (node) ->
@@ -115,6 +167,14 @@ test_node_exit = (node) ->
   return unless (node.offset.top_from_bottom <= 0) or (node.offset.bottom_from_top <= node.margin.top)
 
   node.offset.is_passing = false
+
+  stack.visibleIndexes = stack.visibleIndexes
+    .filter((old) -> old isnt node.offset.index)
+    .sort()
+
+  if debug.is_enabled
+    debug.info('keys').text(stack.visibleIndexes.join(', '))
+
   trigger 'exit', { node, to: last_direction }
 
 test_all_offsets = (scroll) ->
@@ -307,6 +367,9 @@ update_everything = (destroy) ->
   calculate_all_offsets()
   test_for_scroll_and_offsets()
 
+  if debug.is_enabled
+    debug.info('jump').html ("<option>#{i - 1}</option>" for i in [1..stack.contentNodes.length])
+
   trigger 'update', { stack }
 
 win.on 'touchmove scroll', ->
@@ -326,6 +389,17 @@ $.scrollKit = (params, callback) ->
     update_everything(true)
   else
     unless params is 'update'
+      $.scrollKit.debug(params.debug)
+
+      stack.offsetTop = +params.top if params.top >= 0
+      stack.gap.offset = +params.gap if params.gap >= 0
+
+      if debug.is_enabled
+        debug.info('gap').css 'top', if stack.gap.offset >= 0
+          stack.gap.offset
+        else
+          -1
+
       sticky_className = params.stickyClassName or 'is-sticky'
       content_className = params.contentClassName or 'is-content'
 
@@ -334,6 +408,11 @@ $.scrollKit = (params, callback) ->
       stack.contentNodes = document.getElementsByClassName content_className
 
     update_everything()
+  return
+
+$.scrollKit.debug = (state) ->
+  debug.is_enabled = !!state
+  debug.element[if state then 'show' else 'hide']()
   return
 
 $.scrollKit.update = ->
