@@ -517,4 +517,14 @@
     return old_handler;
   };
 
+  $.scrollKit.updateOffsets = function(params) {
+    if (params.top != null) {
+      state.offsetTop = +params.top;
+    }
+    if (params.gap != null) {
+      state.gap.offset = +params.gap;
+    }
+    return update_everything();
+  };
+
 }).call(this);

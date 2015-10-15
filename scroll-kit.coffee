@@ -495,3 +495,8 @@ $.scrollKit.eventHandler = (callback) ->
   old_handler = event_handler
   event_handler = callback if typeof callback is 'function'
   old_handler
+
+$.scrollKit.updateOffsets = (params) ->
+  state.offsetTop = +params.top if params.top?
+  state.gap.offset = +params.gap if params.gap?
+  update_everything()
