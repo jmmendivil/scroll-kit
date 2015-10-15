@@ -88,7 +88,7 @@ document.head.appendChild style
 
 debug.info('jump').on 'change', (e) ->
   return unless debug.is_enabled
-  $.scrollKit.scrollTo(e.target.selectedIndex, state.offsetTop)
+  $.scrollKit.scrollTo(e.target.selectedIndex)
 
 trigger = (type, params) ->
   return unless event_handler
@@ -205,8 +205,9 @@ test_node_enter = (node) ->
 
   node.offset.is_passing = true
 
-  state.visibleIndexes.push node.offset.index
-  state.visibleIndexes.sort()
+  if state.visibleIndexes.indexOf(node.offset.index) is -1
+    state.visibleIndexes.push node.offset.index
+    state.visibleIndexes.sort()
 
   if debug.is_enabled
     debug.info('keys').text(state.visibleIndexes.join(', '))
@@ -483,9 +484,9 @@ $.scrollKit.destroy = ->
   update_everything(true)
   # TODO: detach all content-nodes
 
-$.scrollKit.scrollTo = (index, offset_top) ->
+$.scrollKit.scrollTo = (index) ->
   html_element.animate
-    scrollTop: state.contentNodes[index].offset.top - (offset_top or 0)
+    scrollTop: state.contentNodes[index].offset.top - state.offsetTop
   , 260, 'swing'
   return
 

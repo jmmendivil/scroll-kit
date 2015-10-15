@@ -51,7 +51,7 @@
     if (!debug.is_enabled) {
       return;
     }
-    return $.scrollKit.scrollTo(e.target.selectedIndex, state.offsetTop);
+    return $.scrollKit.scrollTo(e.target.selectedIndex);
   });
 
   trigger = function(type, params) {
@@ -180,8 +180,10 @@
       return;
     }
     node.offset.is_passing = true;
-    state.visibleIndexes.push(node.offset.index);
-    state.visibleIndexes.sort();
+    if (state.visibleIndexes.indexOf(node.offset.index) === -1) {
+      state.visibleIndexes.push(node.offset.index);
+      state.visibleIndexes.sort();
+    }
     if (debug.is_enabled) {
       debug.info('keys').text(state.visibleIndexes.join(', '));
     }
@@ -500,9 +502,9 @@
     return update_everything(true);
   };
 
-  $.scrollKit.scrollTo = function(index, offset_top) {
+  $.scrollKit.scrollTo = function(index) {
     html_element.animate({
-      scrollTop: state.contentNodes[index].offset.top - (offset_top || 0)
+      scrollTop: state.contentNodes[index].offset.top - state.offsetTop
     }, 260, 'swing');
   };
 
