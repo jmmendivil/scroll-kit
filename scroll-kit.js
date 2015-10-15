@@ -128,6 +128,9 @@
 
   update_metrics = function(i, node) {
     var fixed_bottom, should_update, test_bottom, test_top;
+    if (!node.el) {
+      update_offsets(node);
+    }
     fixed_bottom = (win_height - node.offset.top) + last_scroll;
     should_update = node.offset.top_from_bottom !== fixed_bottom || node.offset.index !== i;
     if (should_update) {
@@ -154,9 +157,6 @@
       if (debug.is_enabled) {
         debug.info('jump').val(node.offset.index);
       }
-      trigger('nearest', {
-        node: node
-      });
     }
     return trigger('passing', {
       node: node
