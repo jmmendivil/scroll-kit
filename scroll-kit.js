@@ -484,7 +484,7 @@
     }
   };
 
-  $.scrollKit.version = '0.1.0';
+  $.scrollKit.version = '0.2.0';
 
   $.scrollKit.debug = function(enabled) {
     if (enabled == null) {
