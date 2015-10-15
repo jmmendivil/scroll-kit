@@ -502,10 +502,10 @@
     return update_everything(true);
   };
 
-  $.scrollKit.scrollTo = function(index) {
+  $.scrollKit.scrollTo = function(index, callback) {
     html_element.animate({
       scrollTop: state.contentNodes[index].offset.top - state.offsetTop
-    }, 260, 'swing');
+    }, 260, 'swing', callback);
   };
 
   $.scrollKit.eventHandler = function(callback) {
