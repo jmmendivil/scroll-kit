@@ -436,6 +436,10 @@
     }
   };
 
+  $('img, iframe').on('load error', function() {
+    return update_everything();
+  });
+
   win.on('touchmove scroll', function() {
     return test_for_scroll_and_offsets();
   });

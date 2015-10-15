@@ -424,6 +424,9 @@ update_everything = (destroy) ->
       .val state.gap.nearest
   return
 
+$('img, iframe').on 'load error', ->
+  update_everything()
+
 win.on 'touchmove scroll', ->
   test_for_scroll_and_offsets()
 
