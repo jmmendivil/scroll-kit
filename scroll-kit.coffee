@@ -445,7 +445,8 @@ $.scrollKit = (params, callback) ->
     update_everything(true)
   else
     unless params is 'update'
-      $.scrollKit.debug(params.debug)
+      if params.debug
+        $.scrollKit.debug(params.debug)
 
       state.offsetTop = if params.top then +params.top or 0 +params.top
       state.gap.offset = if params.gap then +params.gap or 0 +params.gap

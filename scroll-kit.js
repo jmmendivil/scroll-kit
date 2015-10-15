@@ -461,7 +461,9 @@
       update_everything(true);
     } else {
       if (params !== 'update') {
-        $.scrollKit.debug(params.debug);
+        if (params.debug) {
+          $.scrollKit.debug(params.debug);
+        }
         state.offsetTop = params.top ? +params.top || 0 + params.top : void 0;
         state.gap.offset = params.gap ? +params.gap || 0 + params.gap : void 0;
         if (debug.is_enabled) {
