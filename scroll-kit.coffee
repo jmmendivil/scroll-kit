@@ -43,8 +43,48 @@ debug =
 
   cached: {}
 
+  style: '''
+    #scroll-kit-info {
+      border-radius: 0 0 5px 0;
+      background: rgba(0, 0, 0, .6);
+      color: #FFFFFF;
+      text-shadow: 1px 1px 1px #000000;
+      position: fixed;
+      padding: 10px;
+      left: 0;
+      top: 0;
+      z-index: 2;
+      font-size: 13px;
+    }
+
+    #scroll-kit-info .gap {
+      top: -1;
+      left: 0;
+      width: 100%;
+      position: fixed;
+    }
+
+    #scroll-kit-info .gap:before {
+      border-bottom: 1px dotted red;
+      position: absolute;
+      content: ' ';
+      width: 100%;
+      top: -1px;
+    }
+
+    #scroll-kit-info label {
+      line-height: 20px;
+      display: block;
+    }
+  '''
+
   info: (key) ->
     debug.cached[key] or (debug.cached[key] = debug.element.find(".#{key}"))
+
+style = document.createElement 'style'
+style.appendChild(document.createTextNode(debug.style))
+
+document.head.appendChild style
 
 debug.info('jump').on 'change', (e) ->
   return unless debug.is_enabled

@@ -1,4 +1,13 @@
-/* demo only */
+/* this reset is required in order to avoid positioning issues */
+* { box-sizing: border-box; }
+
+/* encouraged css-properties to apply */
+.has-stickies { position: relative; overflow: auto; }
+.has-stickies.floating { overflow: hidden; }
+
+.is-sticky { z-index: 1.1; }
+.is-sticky.stuck { z-index: 1.2; }
+.is-sticky.stuck.bottom { z-index: 1.0; }
 
 * { margin: 0; padding: 0; }
 body { font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; }
