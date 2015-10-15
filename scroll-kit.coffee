@@ -448,7 +448,7 @@ $.scrollKit = (params, callback) ->
   if params is 'destroy'
     update_everything(true)
   else
-    unless params is 'update'
+    unless params is 'recalc'
       if params.debug
         $.scrollKit.debug(params.debug)
 
@@ -475,9 +475,7 @@ $.scrollKit.debug = (enabled = true) ->
   debug.element[if enabled then 'show' else 'hide']()
   return
 
-# $.scrollKit.recalc()
-
-$.scrollKit.update = ->
+$.scrollKit.recalc = ->
   update_everything()
 
 $.scrollKit.destroy = ->

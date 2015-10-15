@@ -466,7 +466,7 @@
     if (params === 'destroy') {
       update_everything(true);
     } else {
-      if (params !== 'update') {
+      if (params !== 'recalc') {
         if (params.debug) {
           $.scrollKit.debug(params.debug);
         }
@@ -494,7 +494,7 @@
     debug.element[enabled ? 'show' : 'hide']();
   };
 
-  $.scrollKit.update = function() {
+  $.scrollKit.recalc = function() {
     return update_everything();
   };
 
