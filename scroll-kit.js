@@ -450,38 +450,21 @@
     return update_everything();
   });
 
-  $.scrollKit = function(params, callback) {
+  $.scrollKit = function(params) {
     var content_className, sticky_className;
-    if (typeof params === 'function') {
-      event_handler = params;
-      params = callback;
-      callback = null;
+    if (params.debug) {
+      $.scrollKit.debug(params.debug);
     }
-    if (typeof callback === 'function') {
-      event_handler = callback;
+    state.offsetTop = params.top ? parseInt(params.top, 10) : 0;
+    state.gap.offset = params.gap ? parseInt(params.gap, 10) : 0;
+    if (debug.is_enabled) {
+      debug.info('gap').css('top', state.gap.offset);
     }
-    if (params == null) {
-      params = {};
-    }
-    if (params === 'destroy') {
-      update_everything(true);
-    } else {
-      if (params !== 'recalc') {
-        if (params.debug) {
-          $.scrollKit.debug(params.debug);
-        }
-        state.offsetTop = params.top ? +params.top || 0 + params.top : void 0;
-        state.gap.offset = params.gap ? +params.gap || 0 + params.gap : void 0;
-        if (debug.is_enabled) {
-          debug.info('gap').css('top', state.gap.offset);
-        }
-        sticky_className = params.stickyClassName || 'is-sticky';
-        content_className = params.contentClassName || 'is-content';
-        state.stickyNodes = document.getElementsByClassName(sticky_className);
-        state.contentNodes = document.getElementsByClassName(content_className);
-      }
-      update_everything();
-    }
+    sticky_className = params.stickyClassName || 'is-sticky';
+    content_className = params.contentClassName || 'is-content';
+    state.stickyNodes = document.getElementsByClassName(sticky_className);
+    state.contentNodes = document.getElementsByClassName(content_className);
+    return update_everything();
   };
 
   $.scrollKit.version = '0.2.0';

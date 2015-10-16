@@ -434,39 +434,24 @@ win.on 'touchmove scroll', ->
 win.on 'resize', ->
   update_everything()
 
-$.scrollKit = (params, callback) ->
-  if typeof params is 'function'
-    event_handler = params
-    params = callback
-    callback = null
+$.scrollKit = (params) ->
+  if params.debug
+    $.scrollKit.debug(params.debug)
 
-  if typeof callback is 'function'
-    event_handler = callback
+  state.offsetTop = if params.top then parseInt(params.top, 10) else 0
+  state.gap.offset = if params.gap then parseInt(params.gap, 10) else 0
 
-  params ?= {}
+  if debug.is_enabled
+    debug.info('gap').css 'top', state.gap.offset
 
-  if params is 'destroy'
-    update_everything(true)
-  else
-    unless params is 'recalc'
-      if params.debug
-        $.scrollKit.debug(params.debug)
+  sticky_className = params.stickyClassName or 'is-sticky'
+  content_className = params.contentClassName or 'is-content'
 
-      state.offsetTop = if params.top then +params.top or 0 +params.top
-      state.gap.offset = if params.gap then +params.gap or 0 +params.gap
+  # we prefer to use a (native) live nodeList for avoiding re-scanning
+  state.stickyNodes = document.getElementsByClassName sticky_className
+  state.contentNodes = document.getElementsByClassName content_className
 
-      if debug.is_enabled
-        debug.info('gap').css 'top', state.gap.offset
-
-      sticky_className = params.stickyClassName or 'is-sticky'
-      content_className = params.contentClassName or 'is-content'
-
-      # we prefer to use a (native) live nodeList for avoiding re-scanning
-      state.stickyNodes = document.getElementsByClassName sticky_className
-      state.contentNodes = document.getElementsByClassName content_className
-
-    update_everything()
-  return
+  update_everything()
 
 $.scrollKit.version = '0.2.0'
 
