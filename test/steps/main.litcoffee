@@ -7,7 +7,7 @@ Given loaded "$URI".
 
     (path) ->
       @browser
-        .url('http://0.0.0.0:' + process.env.PORT + path)
+        .url('http://localhost:' + process.env.PORT + path)
         .waitForElementVisible('body', 1000)
         .resizeWindow(800, 600).pause(50)
 
