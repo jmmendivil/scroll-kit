@@ -35,7 +35,7 @@
     is_enabled: false,
     element: $('<div id="scroll-kit-info">\n  <span class="gap"></span>\n  <label>Indexes: <span class="keys"></span></label>\n  <label>ScrollY: <span class="scroll"></span></label>\n  <label>ScrollTo: <select class="jump"></select></label>\n  <label>Direction: <span class="from_to"></span></label>\n</div>').hide().appendTo('body'),
     cached: {},
-    style: '#scroll-kit-info {\n  border-radius: 0 0 5px 0;\n  background: rgba(0, 0, 0, .6);\n  color: #FFFFFF;\n  text-shadow: 1px 1px 1px #000000;\n  position: fixed;\n  padding: 10px;\n  left: 0;\n  top: 0;\n  z-index: 2;\n  font-size: 13px;\n}\n\n#scroll-kit-info .gap {\n  top: -1;\n  left: 0;\n  width: 100%;\n  position: fixed;\n}\n\n#scroll-kit-info .gap:before {\n  border-bottom: 1px dotted red;\n  position: absolute;\n  content: \' \';\n  width: 100%;\n  top: -1px;\n}\n\n#scroll-kit-info label {\n  line-height: 20px;\n  display: block;\n}',
+    style: '#scroll-kit-info {\n  border-radius: 0 0 5px 0;\n  background: rgba(0, 0, 0, .6);\n  color: #FFFFFF;\n  text-shadow: 1px 1px 1px #000000;\n  position: fixed;\n  padding: 10px;\n  left: 0;\n  top: 0;\n  z-index: 99999;\n  font-size: 13px;\n}\n\n#scroll-kit-info .gap {\n  top: -1;\n  left: 0;\n  width: 100%;\n  position: fixed;\n}\n\n#scroll-kit-info .gap:before {\n  border-bottom: 1px dotted red;\n  position: absolute;\n  content: \' \';\n  width: 100%;\n  top: -1px;\n}\n\n#scroll-kit-info label {\n  line-height: 20px;\n  display: block;\n}',
     info: function(key) {
       return debug.cached[key] || (debug.cached[key] = debug.element.find("." + key));
     }
@@ -309,17 +309,15 @@
 
   check_if_fit = function(sticky) {
     var fitted_top;
-    if (sticky.data.fit) {
-      fitted_top = win_height + last_scroll - sticky.offset_top;
-      if (fitted_top >= sticky.passing_top) {
-        if (!sticky.el.hasClass('fit')) {
-          sticky.el.addClass('fit');
-        }
-        return sticky.el.css('height', Math.min(fitted_top - sticky.passing_top, sticky.height));
-      } else {
-        if (sticky.el.hasClass('fit')) {
-          return sticky.el.removeClass('fit');
-        }
+    fitted_top = win_height + last_scroll - sticky.offset_top;
+    if (fitted_top >= sticky.passing_top) {
+      if (!sticky.el.hasClass('fit')) {
+        sticky.el.addClass('fit');
+      }
+      return sticky.el.css('height', Math.min(fitted_top - sticky.passing_top, sticky.height));
+    } else {
+      if (sticky.el.hasClass('fit')) {
+        return sticky.el.removeClass('fit');
       }
     }
   };
@@ -383,13 +381,17 @@
         check_if_can_unstick(sticky);
       } else {
         check_if_can_stick(sticky);
-        if ((last_scroll + sticky.passing_height) >= sticky.passing_bottom) {
-          check_if_can_bottom(sticky);
-        } else {
-          check_if_can_unbottom(sticky);
+        if (sticky.data.bottoming !== false) {
+          if ((last_scroll + sticky.passing_height) >= sticky.passing_bottom) {
+            check_if_can_bottom(sticky);
+          } else {
+            check_if_can_unbottom(sticky);
+          }
         }
       }
-      check_if_fit(sticky);
+      if (sticky.data.fit) {
+        check_if_fit(sticky);
+      }
     }
   };
 
@@ -475,6 +477,9 @@
     }
     debug.is_enabled = !!enabled;
     debug.element[enabled ? 'show' : 'hide']();
+    if (debug.is_enabled) {
+      debug.info('gap').css('top', state.gap.offset);
+    }
   };
 
   $.scrollKit.recalc = function() {

@@ -53,7 +53,7 @@ debug =
       padding: 10px;
       left: 0;
       top: 0;
-      z-index: 2;
+      z-index: 99999;
       font-size: 13px;
     }
 
@@ -322,14 +322,13 @@ initialize_sticky = (node) ->
   return
 
 check_if_fit = (sticky) ->
-  if sticky.data.fit
-    fitted_top = win_height + last_scroll - sticky.offset_top
+  fitted_top = win_height + last_scroll - sticky.offset_top
 
-    if fitted_top >= sticky.passing_top
-      sticky.el.addClass('fit') unless sticky.el.hasClass('fit')
-      sticky.el.css 'height', Math.min(fitted_top - sticky.passing_top, sticky.height)
-    else
-      sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
+  if fitted_top >= sticky.passing_top
+    sticky.el.addClass('fit') unless sticky.el.hasClass('fit')
+    sticky.el.css 'height', Math.min(fitted_top - sticky.passing_top, sticky.height)
+  else
+    sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
 
 check_if_can_stick = (sticky) ->
   unless sticky.el.hasClass('stuck')
@@ -376,12 +375,13 @@ calculate_all_stickes = (scroll) ->
     else
       check_if_can_stick(sticky)
 
-      if (last_scroll + sticky.passing_height) >= sticky.passing_bottom
-        check_if_can_bottom(sticky)
-      else
-        check_if_can_unbottom(sticky)
+      if sticky.data.bottoming isnt false
+        if (last_scroll + sticky.passing_height) >= sticky.passing_bottom
+          check_if_can_bottom(sticky)
+        else
+          check_if_can_unbottom(sticky)
 
-    check_if_fit(sticky)
+    check_if_fit(sticky) if sticky.data.fit
   return
 
 refresh_all_stickies = (destroy) ->
@@ -458,6 +458,7 @@ $.scrollKit.version = '0.2.0'
 $.scrollKit.debug = (enabled = true) ->
   debug.is_enabled = !!enabled
   debug.element[if enabled then 'show' else 'hide']()
+  debug.info('gap').css('top', state.gap.offset) if debug.is_enabled
   return
 
 $.scrollKit.recalc = ->
