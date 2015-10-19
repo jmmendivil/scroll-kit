@@ -454,6 +454,10 @@
 
   $.scrollKit = function(params) {
     var content_className, sticky_className;
+    if (typeof params === 'function') {
+      event_handler = params;
+      params = {};
+    }
     if (params.debug) {
       $.scrollKit.debug(params.debug);
     }

@@ -435,6 +435,10 @@ win.on 'resize', ->
   update_everything()
 
 $.scrollKit = (params) ->
+  if typeof params is 'function'
+    event_handler = params
+    params = {}
+
   if params.debug
     $.scrollKit.debug(params.debug)
 
