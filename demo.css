@@ -5,9 +5,9 @@
 .has-stickies { position: relative; overflow: auto; }
 .has-stickies.floating { overflow: hidden; }
 
-.is-sticky { z-index: 1.1; }
-.is-sticky.stuck { z-index: 1.2; }
-.is-sticky.stuck.bottom { z-index: 1.0; }
+.is-sticky { z-index: 2; }
+.is-sticky.stuck { z-index: 3; }
+.is-sticky.stuck.bottom { z-index: 1; }
 
 * { margin: 0; padding: 0; }
 body { font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; }
