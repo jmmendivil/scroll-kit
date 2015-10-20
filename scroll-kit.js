@@ -473,7 +473,7 @@
     return update_everything();
   };
 
-  $.scrollKit.version = '0.2.0';
+  $.scrollKit.version = '0.2.1';
 
   $.scrollKit.debug = function(enabled) {
     if (enabled == null) {
