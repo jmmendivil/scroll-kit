@@ -8,7 +8,8 @@ language: node_js
 node_js:
 - 0.1
 before_script:
-- npm install -g nahual
+- npm install -g nahual http-server
 script:
 - 'npm run lint'
-- 'nahual -S --target saucelabs'
+- 'http-server -s &'
+- 'nahual -t saucelabs'
