@@ -458,7 +458,7 @@ $.scrollKit = (params) ->
 
   update_everything()
 
-$.scrollKit.version = '0.2.1'
+$.scrollKit.version = '0.2.2'
 
 $.scrollKit.debug = (enabled = true) ->
   debug.is_enabled = !!enabled

@@ -29,13 +29,13 @@
 
   win_height = win.height();
 
-  html_element = $('html');
+  html_element = $('html,body');
 
   debug = {
     is_enabled: false,
     element: $('<div id="scroll-kit-info">\n  <span class="gap"></span>\n  <label>Indexes: <span class="keys"></span></label>\n  <label>ScrollY: <span class="scroll"></span></label>\n  <label>ScrollTo: <select class="jump"></select></label>\n  <label>Direction: <span class="from_to"></span></label>\n</div>').hide().appendTo('body'),
     cached: {},
-    style: '#scroll-kit-info {\n  border-radius: 0 0 5px 0;\n  background: rgba(0, 0, 0, .6);\n  color: #FFFFFF;\n  text-shadow: 1px 1px 1px #000000;\n  position: fixed;\n  padding: 10px;\n  left: 0;\n  top: 0;\n  z-index: 99999;\n  font-size: 13px;\n}\n\n#scroll-kit-info .gap {\n  top: -1;\n  left: 0;\n  width: 100%;\n  position: fixed;\n}\n\n#scroll-kit-info .gap:before {\n  border-bottom: 1px dotted red;\n  position: absolute;\n  content: \' \';\n  width: 100%;\n  top: -1px;\n}\n\n#scroll-kit-info label {\n  line-height: 20px;\n  display: block;\n}',
+    style: '#scroll-kit-info {\n  border-radius: 0 0 5px 0;\n  background: rgba(0, 0, 0, .6);\n  color: #FFFFFF;\n  text-shadow: 1px 1px 1px #000000;\n  position: fixed;\n  padding: 10px;\n  left: 0;\n  top: 0;\n  z-index: 2147483647;\n  font-size: 13px;\n}\n\n#scroll-kit-info .gap {\n  top: -1;\n  left: 0;\n  width: 100%;\n  position: fixed;\n  z-index: 2147483647;\n}\n\n#scroll-kit-info .gap:before {\n  border-bottom: 1px dotted red;\n  position: absolute;\n  content: \' \';\n  width: 100%;\n  top: -1px;\n}\n\n#scroll-kit-info label {\n  line-height: 20px;\n  display: block;\n}',
     info: function(key) {
       return debug.cached[key] || (debug.cached[key] = debug.element.find("." + key));
     }
@@ -473,7 +473,7 @@
     return update_everything();
   };
 
-  $.scrollKit.version = '0.2.1';
+  $.scrollKit.version = '0.2.2';
 
   $.scrollKit.debug = function(enabled) {
     if (enabled == null) {
@@ -482,6 +482,7 @@
     debug.is_enabled = !!enabled;
     debug.element[enabled ? 'show' : 'hide']();
     if (debug.is_enabled) {
+      update_everything();
       debug.info('gap').css('top', state.gap.offset);
     }
   };
