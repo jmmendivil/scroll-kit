@@ -479,7 +479,7 @@
     return update_everything();
   };
 
-  $.scrollKit.version = '0.2.2';
+  $.scrollKit.version = '0.2.3';
 
   $.scrollKit.pop = function(node, stuck) {
     if (stuck !== false) {
