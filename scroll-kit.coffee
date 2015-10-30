@@ -25,7 +25,7 @@ win = $(window)
 win_height = win.height()
 
 # required for scrolling
-html_element = $('html')
+html_element = $('html,body')
 
 # ;-)
 debug =
@@ -53,7 +53,7 @@ debug =
       padding: 10px;
       left: 0;
       top: 0;
-      z-index: 99999;
+      z-index: 2147483647;
       font-size: 13px;
     }
 
@@ -62,6 +62,7 @@ debug =
       left: 0;
       width: 100%;
       position: fixed;
+      z-index: 2147483647;
     }
 
     #scroll-kit-info .gap:before {
@@ -462,7 +463,10 @@ $.scrollKit.version = '0.2.1'
 $.scrollKit.debug = (enabled = true) ->
   debug.is_enabled = !!enabled
   debug.element[if enabled then 'show' else 'hide']()
-  debug.info('gap').css('top', state.gap.offset) if debug.is_enabled
+
+  if debug.is_enabled
+    update_everything()
+    debug.info('gap').css('top', state.gap.offset)
   return
 
 $.scrollKit.recalc = ->
