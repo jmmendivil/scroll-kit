@@ -487,11 +487,9 @@
         check_if_can_bottom(node);
         node.data.bottoming = true;
       }
-    } else {
-      if (node.data.bottoming) {
-        check_if_can_unbottom(node);
-        node.data.bottoming = false;
-      }
+    } else if (node.data.bottoming !== false) {
+      check_if_can_unbottom(node);
+      node.data.bottoming = false;
     }
   };
 
