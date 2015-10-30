@@ -14,6 +14,7 @@ state =
     nearest: null
 
   offsetTop: 0
+  references: {}
 
   stickyNodes: []
   contentNodes: []
@@ -25,7 +26,8 @@ win = $(window)
 win_height = win.height()
 
 # required for scrolling
-html_element = $('html,body')
+html = $('html,body')
+body = $(document.body)
 
 # ;-)
 debug =
@@ -39,7 +41,7 @@ debug =
       <label>ScrollTo: <select class="jump"></select></label>
       <label>Direction: <span class="from_to"></span></label>
     </div>
-  ''').hide().appendTo 'body'
+  ''').hide().appendTo body
 
   cached: {}
 
@@ -103,8 +105,8 @@ trigger = (type, params) ->
   event_handler(params)
 
 set_classes = (name) ->
-  unless html_element.hasClass(name)
-    html_element.removeClass('backward forward static').addClass(name)
+  unless body.hasClass(name)
+    body.removeClass('backward forward static').addClass(name)
 
     if debug.is_enabled
       debug.info('from_to').text(last_direction + ' / ' + name)
@@ -119,9 +121,9 @@ test_on_scroll = ->
   return if last_scroll is scroll_top
 
   unless scroll_top
-    html_element.removeClass('has-scroll') if html_element.hasClass('has-scroll')
+    body.removeClass('has-scroll') if body.hasClass('has-scroll')
   else
-    html_element.addClass('has-scroll') unless html_element.hasClass('has-scroll')
+    body.addClass('has-scroll') unless body.hasClass('has-scroll')
 
   set_classes if scroll_top < last_scroll
     'backward'
@@ -320,6 +322,10 @@ initialize_sticky = (node) ->
   node.isFloat = el.css('float') isnt 'none'
   node.isFixed = data.fixed or (el.css('position') is 'fixed')
   node.placeholder = placeholder(node) if update_sticky(node)
+
+  # persists id-reference
+  state.references[data.id] = node if data.id?
+
   return
 
 check_if_fit = (sticky) ->
@@ -367,7 +373,7 @@ check_if_can_unbottom = (sticky) ->
       left: sticky.offset.left
       top: sticky.offset_top
 
-calculate_all_stickes = (scroll) ->
+calculate_all_stickes = ->
   for sticky in state.stickyNodes
     continue if sticky.isFixed
 
@@ -460,6 +466,24 @@ $.scrollKit = (params) ->
 
 $.scrollKit.version = '0.2.2'
 
+$.scrollKit.pop = (node, stuck) ->
+  if stuck isnt false
+    unless node.data.bottoming
+      check_if_can_bottom(node)
+      node.data.bottoming = true
+  else
+    if node.data.bottoming
+      check_if_can_unbottom(node)
+      node.data.bottoming = false
+  return
+
+$.scrollKit.find = (id) ->
+  if typeof id isnt 'function'
+    state.references[id]
+  else
+    # TODO: unify sticky/content nodes
+    Array::filter.call(state.contentNodes, id)
+
 $.scrollKit.debug = (enabled = true) ->
   debug.is_enabled = !!enabled
   debug.element[if enabled then 'show' else 'hide']()
@@ -477,7 +501,7 @@ $.scrollKit.destroy = ->
   # TODO: detach all content-nodes
 
 $.scrollKit.scrollTo = (index, callback) ->
-  html_element.animate
+  html.animate
     scrollTop: state.contentNodes[index].offset.top - state.offsetTop
   , 260, 'swing', callback
   return

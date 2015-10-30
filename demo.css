@@ -5,8 +5,8 @@
 .has-stickies { position: relative; overflow: auto; }
 .has-stickies.floating { overflow: hidden; }
 
-.is-sticky { z-index: 2; }
-.is-sticky.stuck { z-index: 3; }
+.is-sticky { z-index: 1; }
+.is-sticky.stuck { z-index: 2; }
 .is-sticky.stuck.bottom { z-index: 1; }
 
 * { margin: 0; padding: 0; }
@@ -29,7 +29,7 @@ section ~ section { margin-top: 10px; }
 .sidebar.right { border-left: 1px solid #DDDDDD; }
 
 .stacked .is-sticky { border-top: 1px solid transparent; }
-.stacked .is-sticky.bottom { border-color: #DDDDDD; }
+.stacked .is-sticky.stuck.bottom { z-index: 3; border-color: #DDDDDD; }
 
 .content { max-width: 55%; }
 
