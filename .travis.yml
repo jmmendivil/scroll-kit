@@ -12,4 +12,4 @@ before_script:
 script:
 - 'npm run lint'
 - 'http-server -s &'
-- 'nahual -e saucelabs'
+- 'nahual --target saucelabs'
