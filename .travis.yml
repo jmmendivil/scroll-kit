@@ -8,10 +8,9 @@ language: node_js
 node_js:
 - 0.1
 before_script:
-- npm install -g nahual http-server
+- npm install -g bower nahual http-server
 script:
+- 'bower install'
 - 'npm run lint'
 - 'http-server -s &'
-- 'sleep 3'
-- 'curl http://localhost:8080'
 - 'nahual --target saucelabs'
