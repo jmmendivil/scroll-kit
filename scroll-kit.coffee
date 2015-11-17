@@ -470,7 +470,7 @@ $.scrollKit = (params) ->
 
   update_everything()
 
-$.scrollKit.version = '0.2.3'
+$.scrollKit.version = '0.2.4'
 
 $.scrollKit.on = (node) ->
   if node.data.disabled
