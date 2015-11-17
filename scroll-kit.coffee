@@ -328,6 +328,16 @@ initialize_sticky = (node) ->
 
   return
 
+destroy_sticky = (node) ->
+  node.el.attr('style', '').removeClass 'fit stuck bottom'
+  node.placeholder.remove()
+  return
+
+init_sticky = (node) ->
+  update_sticky(node)
+  node.placeholder = placeholder(node)
+  return
+
 check_if_fit = (sticky) ->
   fitted_top = win_height + last_scroll - sticky.offset_top
 
@@ -375,7 +385,7 @@ check_if_can_unbottom = (sticky) ->
 
 calculate_all_stickes = ->
   for sticky in state.stickyNodes
-    continue if sticky.isFixed
+    continue if sticky.isFixed or sticky.data.disabled
 
     if last_scroll <= sticky.passing_top
       check_if_can_unstick(sticky)
@@ -397,15 +407,11 @@ refresh_all_stickies = (destroy) ->
 
   # detach destroyed stickies
   for sticky in state.stickyNodes
-    unless sticky.el
-      initialize_sticky(sticky)
-    else
-      sticky.el.attr('style', '').removeClass 'fit stuck bottom'
-      sticky.placeholder.remove()
+    initialize_sticky(sticky) unless sticky.el
 
-      unless destroy
-        update_sticky(sticky)
-        sticky.placeholder = placeholder(sticky)
+    unless sticky.data.disabled
+      destroy_sticky(sticky)
+      init_sticky(sticky) unless destroy
   return
 
 test_for_scroll_and_offsets = ->
@@ -466,7 +472,23 @@ $.scrollKit = (params) ->
 
 $.scrollKit.version = '0.2.3'
 
+$.scrollKit.on = (node) ->
+  if node.data.disabled
+    init_sticky(node)
+    node.data.disabled = false
+    refresh_all_stickies()
+    calculate_all_stickes()
+  return
+
+$.scrollKit.off = (node) ->
+  unless node.data.disabled
+    destroy_sticky(node)
+    node.data.disabled = true
+  return
+
 $.scrollKit.pop = (node, stuck) ->
+  return if node.data.disabled
+
   if stuck isnt false
     unless node.data.bottoming
       check_if_can_bottom(node)
