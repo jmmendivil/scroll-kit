@@ -1,3 +1,5 @@
+VERSION = '0.2.4'
+
 offsets = {}
 group_id = 0
 
@@ -474,7 +476,7 @@ $.scrollKit = (params) ->
 
   update_everything()
 
-$.scrollKit.version = '0.2.4'
+$.scrollKit.version = VERSION
 
 $.scrollKit.on = (node) ->
   if node.data.disabled
