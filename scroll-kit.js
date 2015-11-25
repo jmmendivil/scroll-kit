@@ -19,6 +19,7 @@
       offset: -1,
       nearest: null
     },
+    classes: {},
     offsetTop: 0,
     references: {},
     stickyNodes: [],
@@ -417,10 +418,12 @@
     ref = state.stickyNodes;
     for (j = 0, len = ref.length; j < len; j++) {
       sticky = ref[j];
+      if (sticky.data && sticky.data.disabled) {
+        continue;
+      }
       if (!sticky.el) {
         initialize_sticky(sticky);
-      }
-      if (!sticky.data.disabled) {
+      } else {
         destroy_sticky(sticky);
         if (!destroy) {
           init_sticky(sticky);
@@ -481,8 +484,8 @@
     if (debug.is_enabled) {
       debug.info('gap').css('top', state.gap.offset);
     }
-    sticky_className = params.stickyClassName || 'is-sticky';
-    content_className = params.contentClassName || 'is-content';
+    sticky_className = state.classes.stickyClassName = params.stickyClassName || 'is-sticky';
+    content_className = state.classes.contentClassName = params.contentClassName || 'is-content';
     state.stickyNodes = document.getElementsByClassName(sticky_className);
     state.contentNodes = document.getElementsByClassName(content_className);
     return update_everything();
@@ -504,6 +507,15 @@
       destroy_sticky(node);
       node.data.disabled = true;
     }
+  };
+
+  $.scrollKit.add = function(node, options) {
+    if (node.hasClass(state.classes.stickyClassName)) {
+      return;
+    }
+    node.data({
+      sticky: options
+    }).addClass(state.classes.stickyClassName);
   };
 
   $.scrollKit.pop = function(node, stuck) {

@@ -13,6 +13,8 @@ state =
     offset: -1
     nearest: null
 
+  classes: {}
+
   offsetTop: 0
   references: {}
 
@@ -463,8 +465,8 @@ $.scrollKit = (params) ->
   if debug.is_enabled
     debug.info('gap').css 'top', state.gap.offset
 
-  sticky_className = params.stickyClassName or 'is-sticky'
-  content_className = params.contentClassName or 'is-content'
+  sticky_className = state.classes.stickyClassName = params.stickyClassName or 'is-sticky'
+  content_className = state.classes.contentClassName = params.contentClassName or 'is-content'
 
   # we prefer to use a (native) live nodeList for avoiding re-scanning
   state.stickyNodes = document.getElementsByClassName sticky_className
@@ -486,6 +488,11 @@ $.scrollKit.off = (node) ->
   unless node.data.disabled
     destroy_sticky(node)
     node.data.disabled = true
+  return
+
+$.scrollKit.add = (node, options) ->
+  return if node.hasClass(state.classes.stickyClassName)
+  node.data(sticky: options).addClass(state.classes.stickyClassName)
   return
 
 $.scrollKit.pop = (node, stuck) ->
