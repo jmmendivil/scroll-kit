@@ -493,9 +493,9 @@ $.scrollKit.off = (node) ->
   return
 
 $.scrollKit.add = (node, options) ->
-  return if node.hasClass(state.classes.stickyClassName)
-  node.data(sticky: options).addClass(state.classes.stickyClassName)
-  return
+  unless node.hasClass(state.classes.stickyClassName)
+    node.data(sticky: options).addClass(state.classes.stickyClassName)
+  node[0]
 
 $.scrollKit.pop = (node, stuck) ->
   return if node.data.disabled
@@ -528,8 +528,10 @@ $.scrollKit.debug = (enabled = true) ->
 $.scrollKit.recalc = ->
   update_everything()
 
-$.scrollKit.destroy = ->
-  update_everything(true)
+$.scrollKit.destroy = (node) ->
+  return update_everything(true) unless node
+  node.el.remove()
+  update_everything()
   # TODO: detach all content-nodes
 
 $.scrollKit.scrollTo = (index, callback) ->
