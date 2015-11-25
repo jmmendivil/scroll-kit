@@ -2,7 +2,7 @@
 (function() {
   var VERSION, body, calculate_all_offsets, calculate_all_stickes, check_if_can_bottom, check_if_can_stick, check_if_can_unbottom, check_if_can_unstick, check_if_fit, debug, destroy_sticky, event_handler, group_id, html, init_sticky, initialize_sticky, last_direction, last_scroll, offsets, placeholder, refresh_all_stickies, set_classes, state, static_interval, style, test_all_offsets, test_for_scroll_and_offsets, test_node_enter, test_node_exit, test_node_passing, test_node_scroll, test_on_scroll, trigger, update_everything, update_margins, update_metrics, update_offsets, update_sticky, win, win_height;
 
-  VERSION = '0.2.4';
+  VERSION = '0.2.5';
 
   offsets = {};
 
@@ -512,12 +512,12 @@
   };
 
   $.scrollKit.add = function(node, options) {
-    if (node.hasClass(state.classes.stickyClassName)) {
-      return;
+    if (!node.hasClass(state.classes.stickyClassName)) {
+      node.data({
+        sticky: options
+      }).addClass(state.classes.stickyClassName);
     }
-    node.data({
-      sticky: options
-    }).addClass(state.classes.stickyClassName);
+    return node[0];
   };
 
   $.scrollKit.pop = function(node, stuck) {
@@ -559,8 +559,12 @@
     return update_everything();
   };
 
-  $.scrollKit.destroy = function() {
-    return update_everything(true);
+  $.scrollKit.destroy = function(node) {
+    if (!node) {
+      return update_everything(true);
+    }
+    node.el.remove();
+    return update_everything();
   };
 
   $.scrollKit.scrollTo = function(index, callback) {
