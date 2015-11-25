@@ -407,9 +407,11 @@ refresh_all_stickies = (destroy) ->
 
   # detach destroyed stickies
   for sticky in state.stickyNodes
-    initialize_sticky(sticky) unless sticky.el
+    continue if sticky.data and sticky.data.disabled
 
-    unless sticky.data.disabled
+    unless sticky.el
+      initialize_sticky(sticky)
+    else
       destroy_sticky(sticky)
       init_sticky(sticky) unless destroy
   return
