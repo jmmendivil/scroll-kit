@@ -7,9 +7,7 @@ addons:
 language: node_js
 node_js:
 - 0.1
-before_script:
-- npm install -g bower nahual
 script:
-- 'bower install'
 - 'npm run lint'
-- 'nahual --target saucelabs -- python -m SimpleHTTPServer'
+- 'npm run bower'
+- 'npm run nahual'
