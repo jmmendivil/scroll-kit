@@ -8,10 +8,8 @@ language: node_js
 node_js:
 - 0.1
 before_script:
-- npm install -g bower nahual http-server
+- npm install -g bower nahual
 script:
 - 'bower install'
 - 'npm run lint'
-- 'http-server -s &'
-- 'sleep 3'
-- 'nahual --target saucelabs'
+- 'nahual --target saucelabs -- python -m SimpleHTTPServer'
