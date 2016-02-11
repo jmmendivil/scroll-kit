@@ -123,6 +123,7 @@ test_on_scroll = ->
   scroll_top = win.scrollTop()
 
   return if last_scroll is scroll_top
+  return if scroll_top < 0
 
   unless scroll_top
     body.removeClass('has-scroll') if body.hasClass('has-scroll')
