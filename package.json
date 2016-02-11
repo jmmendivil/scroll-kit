@@ -1,6 +1,6 @@
 {
   "name": "scroll-kit",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Take care of your elements on the viewport",
   "main": "scroll-kit.js",
   "scripts": {

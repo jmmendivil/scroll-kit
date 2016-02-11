@@ -92,6 +92,9 @@
     if (last_scroll === scroll_top) {
       return;
     }
+    if (scroll_top < 0) {
+      return;
+    }
     if (!scroll_top) {
       if (body.hasClass('has-scroll')) {
         body.removeClass('has-scroll');
