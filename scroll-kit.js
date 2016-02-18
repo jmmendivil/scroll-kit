@@ -262,7 +262,7 @@
     }
     node.offset_top = offsets[node.data.group];
     node.orig_height = node.el.outerHeight();
-    if (!node.isFloat) {
+    if (!node.isFloat && node.isFixed) {
       offsets[node.data.group] += node.orig_height;
     }
     if (node.isFixed) {
