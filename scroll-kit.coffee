@@ -268,7 +268,7 @@ update_sticky = (node) ->
   node.offset_top = offsets[node.data.group]
 
   # original value
-  node.orig_height = node.el.outerHeight()
+  node.orig_height = node.data.fixed_height || node.el.outerHeight()
 
   # increment the node offset_top based on current group/stack
   offsets[node.data.group] += node.orig_height if (!node.isFloat && node.isFixed)
