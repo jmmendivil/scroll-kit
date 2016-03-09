@@ -352,6 +352,63 @@ check_if_fit = (sticky) ->
   else
     sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
 
+check_if_carry = (sticky) ->
+  _offset = sticky.el.offset()
+  passing_bottom = (sticky.height - win_height + _offset.top)
+
+  ## Forward - Sit
+  if body.hasClass('forward')
+
+    ## Normal Sticky - float
+    if sticky.el.hasClass('stuck')
+      sticky.el.removeClass('stuck')
+        .addClass('sit') ## pretend was Sit
+      check_if_can_float sticky
+
+    if last_scroll >= passing_bottom
+      return if sticky.el.hasClass 'bottom'
+      check_if_can_sit sticky
+
+     ## Hold on, boy!
+     if (last_scroll + win_height) >= sticky.passing_bottom
+       check_if_can_bottom sticky
+
+  ## Backward - Sticky top
+  else if body.hasClass('backward')
+    check_if_can_float sticky
+
+    ## Sticky start - reset pos
+    if sticky.el.hasClass('bottom')
+      sticky.el.removeClass('bottom')
+      update_sticky sticky
+
+    ## Sticky
+    if last_scroll <= sticky.passing_top
+      check_if_can_stick sticky
+      if last_scroll <= sticky.el.parent().offset().top
+        check_if_can_unstick sticky
+        update_sticky sticky
+
+check_if_can_sit = (sticky) ->
+  unless sticky.el.hasClass('sit')
+    sticky.el.addClass('sit')
+      .attr('style', '').css
+        position: 'fixed'
+        width: sticky.width
+        height: sticky.height
+        left: sticky.offset.left
+        bottom: 0
+
+check_if_can_float = (sticky) ->
+  if sticky.el.hasClass('sit')
+    _offset = sticky.el.offset()
+    sticky.el.removeClass('sit')
+      .attr('style', '').css
+        position: 'absolute'
+        top: _offset.top
+        left: sticky.position.left
+    update_sticky sticky
+
 check_if_can_stick = (sticky) ->
   unless sticky.el.hasClass('stuck')
     if sticky.placeholder
@@ -370,11 +427,11 @@ check_if_can_unstick = (sticky) ->
     if sticky.placeholder
       sticky.placeholder.css('display', 'none')
 
-    sticky.el.removeClass('fit stuck bottom').attr 'style', ''
+    sticky.el.removeClass('fit stuck bottom sit').attr 'style', ''
 
 check_if_can_bottom = (sticky) ->
   unless sticky.el.hasClass('bottom')
-    sticky.el.addClass('bottom').css
+    sticky.el.removeClass('sit').addClass('bottom').css
       position: 'absolute'
       left: sticky.position.left
       bottom: sticky.fixed_bottom or 0
@@ -392,10 +449,12 @@ calculate_all_stickes = ->
   for sticky in state.stickyNodes
     continue if sticky.isFixed or sticky.data.disabled
 
-    if last_scroll <= sticky.passing_top
-      check_if_can_unstick(sticky)
+    if sticky.data.carry or sticky.el.hasClass('is-sticky--carry')
+      check_if_carry sticky
+    else if last_scroll <= sticky.passing_top
+      check_if_can_unstick sticky
     else
-      check_if_can_stick(sticky)
+      check_if_can_stick sticky
 
       if sticky.data.bottoming isnt false
         if (last_scroll + sticky.passing_height) >= sticky.passing_bottom
