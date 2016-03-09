@@ -29,12 +29,9 @@ section ~ section { margin-top: 10px; }
 .sidebar.left { border-right: 1px solid #DDDDDD; }
 .sidebar.right { border-left: 1px solid #DDDDDD; }
 
-.stacked .is-sticky { border-top: 1px solid transparent; }
-.stacked .is-sticky.stuck.bottom { z-index: 3; border-color: #DDDDDD; }
-
+.is-sticky { border-top: 1px solid transparent; background: #EEEEEE; }
+.is-sticky.stuck, .is-sticky.sit { background: repeating-linear-gradient( 45deg, #DDD, #DDD 20px, #EEE 20px, #EEE 40px); }
 .content { max-width: 55%; }
-
-.is-sticky { background: #EEEEEE; }
 
 @media screen and (min-width: 798px) {
   main { width: 768px; margin: 10px auto; }
