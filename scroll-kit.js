@@ -346,13 +346,13 @@
 
   check_if_carry = function(sticky) {
     var _offset, passing_bottom;
-    _offset = sticky.el.offset();
-    passing_bottom = sticky.height - win_height + _offset.top;
     if (body.hasClass('forward')) {
       if (sticky.el.hasClass('stuck')) {
         sticky.el.removeClass('stuck').addClass('sit');
         check_if_can_float(sticky);
       }
+      _offset = sticky.el.offset();
+      passing_bottom = sticky.height - win_height + _offset.top;
       if (last_scroll >= passing_bottom) {
         if (sticky.el.hasClass('bottom')) {
           return;
@@ -370,7 +370,7 @@
       }
       if (last_scroll <= sticky.passing_top) {
         check_if_can_stick(sticky);
-        if (last_scroll <= sticky.el.parent().offset().top) {
+        if (last_scroll <= sticky.parent.offset().top) {
           check_if_can_unstick(sticky);
           return update_sticky(sticky);
         }
@@ -396,7 +396,8 @@
       _offset = sticky.el.offset();
       sticky.el.removeClass('sit').attr('style', '').css({
         position: 'absolute',
-        top: _offset.top,
+        width: sticky.width,
+        top: _offset.top - sticky.parent.offset().top,
         left: sticky.position.left
       });
       return update_sticky(sticky);
@@ -435,6 +436,7 @@
         left: sticky.position.left,
         bottom: sticky.fixed_bottom || 0,
         top: 'auto',
+        width: sticky.width,
         height: sticky.data.fit ? sticky.height : void 0
       });
     }
@@ -529,11 +531,22 @@
   });
 
   win.on('touchmove scroll', function() {
-    return test_for_scroll_and_offsets();
+    var ticking;
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        var ticking;
+        test_for_scroll_and_offsets();
+        return ticking = false;
+      });
+    }
+    return ticking = true;
   });
 
   win.on('resize', function() {
-    return update_everything();
+    clearTimeout(static_interval);
+    return static_interval = setTimeout(function() {
+      return update_everything();
+    }, 260);
   });
 
   $.scrollKit = function(params) {
