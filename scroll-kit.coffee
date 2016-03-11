@@ -353,8 +353,6 @@ check_if_fit = (sticky) ->
     sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
 
 check_if_carry = (sticky) ->
-  _offset = sticky.el.offset()
-  passing_bottom = (sticky.height - win_height + _offset.top)
 
   ## Forward - Sit
   if body.hasClass('forward')
@@ -365,13 +363,16 @@ check_if_carry = (sticky) ->
         .addClass('sit') ## pretend was Sit
       check_if_can_float sticky
 
+    _offset = sticky.el.offset()
+    passing_bottom = (sticky.height - win_height + _offset.top)
+
     if last_scroll >= passing_bottom
       return if sticky.el.hasClass 'bottom'
       check_if_can_sit sticky
 
-     ## Hold on, boy!
-     if (last_scroll + win_height) >= sticky.passing_bottom
-       check_if_can_bottom sticky
+    ## Hold on, boy!
+    if (last_scroll + win_height) >= sticky.passing_bottom
+      check_if_can_bottom sticky
 
   ## Backward - Sticky top
   else if body.hasClass('backward')
@@ -385,7 +386,7 @@ check_if_carry = (sticky) ->
     ## Sticky
     if last_scroll <= sticky.passing_top
       check_if_can_stick sticky
-      if last_scroll <= sticky.el.parent().offset().top
+      if last_scroll <= sticky.parent.offset().top
         check_if_can_unstick sticky
         update_sticky sticky
 
@@ -405,7 +406,7 @@ check_if_can_float = (sticky) ->
     sticky.el.removeClass('sit')
       .attr('style', '').css
         position: 'absolute'
-        top: _offset.top
+        top: _offset.top - sticky.parent.offset().top
         left: sticky.position.left
     update_sticky sticky
 
@@ -508,10 +509,17 @@ $('img, iframe').on 'load error', ->
   update_everything()
 
 win.on 'touchmove scroll', ->
-  test_for_scroll_and_offsets()
+  unless ticking
+    requestAnimationFrame ->
+      test_for_scroll_and_offsets()
+      ticking = false
+  ticking = true
 
 win.on 'resize', ->
-  update_everything()
+  clearTimeout static_interval
+  static_interval = setTimeout ->
+    update_everything()
+  , 260
 
 $.scrollKit = (params) ->
   if typeof params is 'function'
