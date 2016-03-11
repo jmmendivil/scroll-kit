@@ -1,4 +1,4 @@
-VERSION = '0.2.7'
+VERSION = '0.3.0'
 
 offsets = {}
 group_id = 0
@@ -8,6 +8,8 @@ last_direction = 'initial'
 
 event_handler = null
 static_interval = null
+
+ticking = false
 
 # :)
 state =
@@ -352,6 +354,65 @@ check_if_fit = (sticky) ->
   else
     sticky.el.removeClass('fit') if sticky.el.hasClass('fit')
 
+check_if_carry = (sticky) ->
+
+  ## Forward - Sit
+  if body.hasClass('forward')
+
+    ## Normal Sticky - float
+    if sticky.el.hasClass('stuck')
+      sticky.el.removeClass('stuck')
+        .addClass('sit') ## pretend was Sit
+      check_if_can_float sticky
+
+    _offset = sticky.el.offset()
+    passing_bottom = (sticky.height - win_height + _offset.top)
+
+    if last_scroll >= passing_bottom
+      return if sticky.el.hasClass 'bottom'
+      check_if_can_sit sticky
+
+    ## Hold on, boy!
+    if (last_scroll + win_height) >= sticky.passing_bottom
+      check_if_can_bottom sticky
+
+  ## Backward - Sticky top
+  else if body.hasClass('backward')
+    check_if_can_float sticky
+
+    ## Sticky start - reset pos
+    if sticky.el.hasClass('bottom')
+      sticky.el.removeClass('bottom')
+      update_sticky sticky
+
+    ## Sticky
+    if last_scroll <= sticky.passing_top
+      check_if_can_stick sticky
+      if last_scroll <= sticky.parent.offset().top
+        check_if_can_unstick sticky
+        update_sticky sticky
+
+check_if_can_sit = (sticky) ->
+  unless sticky.el.hasClass('sit')
+    sticky.el.addClass('sit')
+      .attr('style', '').css
+        position: 'fixed'
+        width: sticky.width
+        height: sticky.height
+        left: sticky.offset.left
+        bottom: 0
+
+check_if_can_float = (sticky) ->
+  if sticky.el.hasClass('sit')
+    _offset = sticky.el.offset()
+    sticky.el.removeClass('sit')
+      .attr('style', '').css
+        position: 'absolute'
+        width: sticky.width
+        top: _offset.top - sticky.parent.offset().top
+        left: sticky.position.left
+    update_sticky sticky
+
 check_if_can_stick = (sticky) ->
   unless sticky.el.hasClass('stuck')
     if sticky.placeholder
@@ -370,15 +431,16 @@ check_if_can_unstick = (sticky) ->
     if sticky.placeholder
       sticky.placeholder.css('display', 'none')
 
-    sticky.el.removeClass('fit stuck bottom').attr 'style', ''
+    sticky.el.removeClass('fit stuck bottom sit').attr 'style', ''
 
 check_if_can_bottom = (sticky) ->
   unless sticky.el.hasClass('bottom')
-    sticky.el.addClass('bottom').css
+    sticky.el.removeClass('sit').addClass('bottom').css
       position: 'absolute'
       left: sticky.position.left
       bottom: sticky.fixed_bottom or 0
       top: 'auto'
+      width: sticky.width
       height: sticky.height if sticky.data.fit
 
 check_if_can_unbottom = (sticky) ->
@@ -392,10 +454,12 @@ calculate_all_stickes = ->
   for sticky in state.stickyNodes
     continue if sticky.isFixed or sticky.data.disabled
 
-    if last_scroll <= sticky.passing_top
-      check_if_can_unstick(sticky)
+    if sticky.data.carry or sticky.el.hasClass('is-sticky--carry')
+      check_if_carry sticky
+    else if last_scroll <= sticky.passing_top
+      check_if_can_unstick sticky
     else
-      check_if_can_stick(sticky)
+      check_if_can_stick sticky
 
       if sticky.data.bottoming isnt false
         if (last_scroll + sticky.passing_height) >= sticky.passing_bottom
@@ -449,10 +513,17 @@ $('img, iframe').on 'load error', ->
   update_everything()
 
 win.on 'touchmove scroll', ->
-  test_for_scroll_and_offsets()
+  unless ticking
+    requestAnimationFrame ->
+      test_for_scroll_and_offsets()
+      ticking = false
+  ticking = true
 
 win.on 'resize', ->
-  update_everything()
+  clearTimeout static_interval
+  static_interval = setTimeout ->
+    update_everything()
+  , 260
 
 $.scrollKit = (params) ->
   if typeof params is 'function'
