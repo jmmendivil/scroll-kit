@@ -1,6 +1,6 @@
 {
   "name": "scroll-kit",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "Take care of your elements on the viewport",
   "main": [
     "scroll-kit.js",
@@ -11,8 +11,10 @@
   },
   "authors": [
     "Alvaro Cabrera <pateketrueke@gmail.com>",
-    "Juan Carlos Teofilo <jcteo87@gmail.com>"
+    "Juan Carlos Teofilo <jcteo87@gmail.com>",
+    "Juan Mendivil <juan@mendivil.mx>"
   ],
+  "license": "MIT",
   "license": "MIT",
   "ignore": [
     "**/.*",
