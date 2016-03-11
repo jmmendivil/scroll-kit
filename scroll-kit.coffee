@@ -406,6 +406,7 @@ check_if_can_float = (sticky) ->
     sticky.el.removeClass('sit')
       .attr('style', '').css
         position: 'absolute'
+        width: sticky.width
         top: _offset.top - sticky.parent.offset().top
         left: sticky.position.left
     update_sticky sticky
@@ -437,6 +438,7 @@ check_if_can_bottom = (sticky) ->
       left: sticky.position.left
       bottom: sticky.fixed_bottom or 0
       top: 'auto'
+      width: sticky.width
       height: sticky.height if sticky.data.fit
 
 check_if_can_unbottom = (sticky) ->
