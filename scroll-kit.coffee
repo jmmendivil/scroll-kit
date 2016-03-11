@@ -9,6 +9,8 @@ last_direction = 'initial'
 event_handler = null
 static_interval = null
 
+ticking = false
+
 # :)
 state =
   gap:
