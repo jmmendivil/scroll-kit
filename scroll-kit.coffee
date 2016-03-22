@@ -1,4 +1,4 @@
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 
 offsets = {}
 group_id = 0
@@ -509,6 +509,8 @@ update_everything = (destroy) ->
       .val state.gap.nearest
   return
 
+## not sure about this...
+## also, will not work for new img/iframe created elems
 $('img, iframe').on 'load error', ->
   update_everything()
 
@@ -607,8 +609,10 @@ $.scrollKit.destroy = (node) ->
   # TODO: detach all content-nodes
 
 $.scrollKit.scrollTo = (index, callback) ->
+  contentNode  = state.contentNodes[index]
+  _offset = $(contentNode).offset()
   html.animate
-    scrollTop: state.contentNodes[index].offset.top - state.offsetTop
+    scrollTop: _offset.top - state.offsetTop
   , 260, 'swing', callback
   return
 
