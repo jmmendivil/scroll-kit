@@ -110,7 +110,7 @@
     clearTimeout(static_interval);
     static_interval = setTimeout(function() {
       return set_classes('static');
-    }, 260);
+    }, 360);
     if (debug.is_enabled) {
       debug.info('scroll').text(scroll_top);
     }
