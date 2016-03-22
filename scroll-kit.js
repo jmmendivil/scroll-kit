@@ -2,7 +2,7 @@
 (function() {
   var VERSION, body, calculate_all_offsets, calculate_all_stickes, check_if_can_bottom, check_if_can_float, check_if_can_sit, check_if_can_stick, check_if_can_unbottom, check_if_can_unstick, check_if_carry, check_if_fit, debug, destroy_sticky, event_handler, group_id, html, init_sticky, initialize_sticky, last_direction, last_scroll, offsets, placeholder, refresh_all_stickies, set_classes, state, static_interval, style, test_all_offsets, test_for_scroll_and_offsets, test_node_enter, test_node_exit, test_node_passing, test_node_scroll, test_on_scroll, ticking, trigger, update_everything, update_margins, update_metrics, update_offsets, update_sticky, win, win_height;
 
-  VERSION = '0.3.0';
+  VERSION = '0.3.1';
 
   offsets = {};
 
@@ -645,9 +645,9 @@
   };
 
   $.scrollKit.scrollTo = function(index, callback) {
-    var _offset, sticky;
-    sticky = state.contentNodes[index];
-    _offset = $(sticky).offset();
+    var _offset, contentNode;
+    contentNode = state.contentNodes[index];
+    _offset = $(contentNode).offset();
     html.animate({
       scrollTop: _offset.top - state.offsetTop
     }, 260, 'swing', callback);
