@@ -609,8 +609,8 @@ $.scrollKit.destroy = (node) ->
   # TODO: detach all content-nodes
 
 $.scrollKit.scrollTo = (index, callback) ->
-  sticky  = state.contentNodes[index]
-  _offset = $(sticky).offset()
+  contentNode  = state.contentNodes[index]
+  _offset = $(contentNode).offset()
   html.animate
     scrollTop: _offset.top - state.offsetTop
   , 260, 'swing', callback
