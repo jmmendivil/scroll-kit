@@ -645,8 +645,11 @@
   };
 
   $.scrollKit.scrollTo = function(index, callback) {
+    var _offset, sticky;
+    sticky = state.contentNodes[index];
+    _offset = $(sticky).offset();
     html.animate({
-      scrollTop: state.contentNodes[index].offset.top - state.offsetTop
+      scrollTop: _offset.top - state.offsetTop
     }, 260, 'swing', callback);
   };
 
