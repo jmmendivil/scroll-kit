@@ -142,7 +142,7 @@ test_on_scroll = ->
   clearTimeout static_interval
   static_interval = setTimeout ->
     set_classes('static')
-  , 260
+  , 360
 
   if debug.is_enabled
     debug.info('scroll').text(scroll_top)
