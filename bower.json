@@ -2,10 +2,7 @@
   "name": "scroll-kit",
   "version": "0.3.1",
   "description": "Take care of your elements on the viewport",
-  "main": [
-    "scroll-kit.js",
-    "scroll-kit.css"
-  ],
+  "main": "scroll-kit.js",
   "dependencies": {
     "jquery": "~2.1.4"
   },
