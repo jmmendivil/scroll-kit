@@ -1,4 +1,4 @@
-VERSION = '0.3.1'
+VERSION = '0.3.3'
 
 offsets = {}
 group_id = 0
@@ -98,6 +98,15 @@ document.head.appendChild style
 debug.info('jump').on 'change', (e) ->
   return unless debug.is_enabled
   $.scrollKit.scrollTo(e.target.selectedIndex)
+
+preventScroll = (e) ->
+  delta = if (e.type is 'mousewheel') then e.originalEvent.wheelDelta else (e.originalEvent.detail * -40)
+  if (delta < 0 and (@scrollHeight - @offsetHeight - @scrollTop) <= 0)
+    @scrollTop = @scrollHeight
+    e.preventDefault()
+  else if (delta > 0 and delta > @scrollTop)
+    @scrollTop = 0
+    e.preventDefault()
 
 trigger = (type, params) ->
   return unless event_handler
@@ -329,6 +338,9 @@ initialize_sticky = (node) ->
   node.isFloat = el.css('float') isnt 'none'
   node.isFixed = data.fixed or (el.css('position') is 'fixed')
   node.placeholder = placeholder(node) if update_sticky(node)
+
+  if node.data.fit
+    node.el.on('DOMMouseScroll mousewheel', preventScroll)
 
   # persists id-reference
   state.references[data.id] = node if data.id?
