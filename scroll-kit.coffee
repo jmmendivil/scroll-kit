@@ -8,6 +8,7 @@ last_direction = 'initial'
 
 event_handler = null
 static_interval = null
+scroll_interval = null
 
 ticking = false
 
@@ -99,13 +100,23 @@ debug.info('jump').on 'change', (e) ->
   return unless debug.is_enabled
   $.scrollKit.scrollTo(e.target.selectedIndex)
 
-preventScroll = (e) ->
+prevent_scroll = (e) ->
+  # detect if sticky-fit
+  if e.target.data?.fit?
+    box_scroll = e.target
+  else
+    _parent = e.target.parentElement
+    box_scroll = _parent if _parent.data?.fit?
+
+  return unless box_scroll
+
+  # prevent
   delta = if (e.type is 'mousewheel') then e.originalEvent.wheelDelta else (e.originalEvent.detail * -40)
-  if (delta < 0 and (@scrollHeight - @offsetHeight - @scrollTop) <= 0)
-    @scrollTop = @scrollHeight
+  if (delta < 0 and (box_scroll.scrollHeight - box_scroll.offsetHeight - box_scroll.scrollTop) <= 0)
+    box_scroll.scrollTop = box_scroll.scrollHeight
     e.preventDefault()
-  else if (delta > 0 and delta > @scrollTop)
-    @scrollTop = 0
+  else if (delta > 0 and delta > box_scroll.scrollTop)
+    box_scroll.scrollTop = 0
     e.preventDefault()
 
 trigger = (type, params) ->
@@ -339,9 +350,6 @@ initialize_sticky = (node) ->
   node.isFixed = data.fixed or (el.css('position') is 'fixed')
   node.placeholder = placeholder(node) if update_sticky(node)
 
-  if node.data.fit
-    node.el.on('DOMMouseScroll mousewheel', preventScroll)
-
   # persists id-reference
   state.references[data.id] = node if data.id?
 
@@ -538,6 +546,8 @@ win.on 'resize', ->
   static_interval = setTimeout ->
     update_everything()
   , 260
+
+win.on 'DOMMouseScroll mousewheel', prevent_scroll
 
 $.scrollKit = (params) ->
   if typeof params is 'function'
