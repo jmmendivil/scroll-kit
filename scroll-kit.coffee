@@ -8,7 +8,6 @@ last_direction = 'initial'
 
 event_handler = null
 static_interval = null
-scroll_interval = null
 
 ticking = false
 
