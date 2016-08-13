@@ -1,4 +1,4 @@
-VERSION = '0.3.1'
+VERSION = '0.3.3'
 
 offsets = {}
 group_id = 0
@@ -98,6 +98,25 @@ document.head.appendChild style
 debug.info('jump').on 'change', (e) ->
   return unless debug.is_enabled
   $.scrollKit.scrollTo(e.target.selectedIndex)
+
+prevent_scroll = (e) ->
+  # detect if sticky-fit
+  if e.target.data?.fit?
+    box_scroll = e.target
+  else
+    _parent = e.target.parentElement
+    box_scroll = _parent if _parent.data?.fit?
+
+  return unless box_scroll
+
+  # prevent
+  delta = if (e.type is 'mousewheel') then e.originalEvent.wheelDelta else (e.originalEvent.detail * -40)
+  if (delta < 0 and (box_scroll.scrollHeight - box_scroll.offsetHeight - box_scroll.scrollTop) <= 0)
+    box_scroll.scrollTop = box_scroll.scrollHeight
+    e.preventDefault()
+  else if (delta > 0 and delta > box_scroll.scrollTop)
+    box_scroll.scrollTop = 0
+    e.preventDefault()
 
 trigger = (type, params) ->
   return unless event_handler
@@ -526,6 +545,8 @@ win.on 'resize', ->
   static_interval = setTimeout ->
     update_everything()
   , 260
+
+win.on 'DOMMouseScroll mousewheel', prevent_scroll
 
 $.scrollKit = (params) ->
   if typeof params is 'function'
