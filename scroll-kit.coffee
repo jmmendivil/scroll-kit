@@ -1,4 +1,4 @@
-VERSION = '0.3.3'
+VERSION = '0.3.3-fix'
 
 offsets = {}
 group_id = 0
@@ -99,13 +99,13 @@ debug.info('jump').on 'change', (e) ->
   return unless debug.is_enabled
   $.scrollKit.scrollTo(e.target.selectedIndex)
 
+get_fit_parent = (el) ->
+  return if el is null # strange el null
+  return if el.data?.fit? then el else get_fit_parent el.parentElement
+
 prevent_scroll = (e) ->
   # detect if sticky-fit
-  if e.target.data?.fit?
-    box_scroll = e.target
-  else
-    _parent = e.target.parentElement
-    box_scroll = _parent if _parent.data?.fit?
+  box_scroll = get_fit_parent e.target
 
   return unless box_scroll
 
