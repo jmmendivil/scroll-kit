@@ -1,4 +1,4 @@
-VERSION = '0.3.3-fix'
+VERSION = '0.3.4'
 
 offsets = {}
 group_id = 0
@@ -99,23 +99,13 @@ debug.info('jump').on 'change', (e) ->
   return unless debug.is_enabled
   $.scrollKit.scrollTo(e.target.selectedIndex)
 
-get_fit_parent = (el) ->
-  return if el is null # strange el null
-  return if el.data?.fit? then el else get_fit_parent el.parentElement
-
 prevent_scroll = (e) ->
-  # detect if sticky-fit
-  box_scroll = get_fit_parent e.target
-
-  return unless box_scroll
-
-  # prevent
   delta = if (e.type is 'mousewheel') then e.originalEvent.wheelDelta else (e.originalEvent.detail * -40)
-  if (delta < 0 and (box_scroll.scrollHeight - box_scroll.offsetHeight - box_scroll.scrollTop) <= 0)
-    box_scroll.scrollTop = box_scroll.scrollHeight
+  if (delta < 0 and (@scrollHeight - @offsetHeight - @scrollTop) <= 0)
+    @scrollTop = @scrollHeight
     e.preventDefault()
-  else if (delta > 0 and delta > box_scroll.scrollTop)
-    box_scroll.scrollTop = 0
+  else if (delta > 0 and delta > @scrollTop)
+    @scrollTop = 0
     e.preventDefault()
 
 trigger = (type, params) ->
@@ -332,6 +322,9 @@ initialize_sticky = (node) ->
   else
     el.parent()
 
+  if data.fit
+    el.on 'DOMMouseScroll mousewheel', prevent_scroll
+
   # auto-grouping
   unless data.group
     unless parent.data('scrollKit_gid') > 0
@@ -545,8 +538,6 @@ win.on 'resize', ->
   static_interval = setTimeout ->
     update_everything()
   , 260
-
-win.on 'DOMMouseScroll mousewheel', prevent_scroll
 
 $.scrollKit = (params) ->
   if typeof params is 'function'
