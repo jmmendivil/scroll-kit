@@ -8,7 +8,7 @@
     "dist": "./node_modules/coffee-script/bin/coffee --output . --compile *.coffee",
     "lint": "./node_modules/coffeelint/bin/coffeelint *.coffee",
     "bower": "bower install --force --production --no-interactive",
-    "nahual": "nahual --target saucelabs --standalone -- python -m SimpleHTTPServer"
+    "nahual": "nahual --target saucelabs --standalone"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
   "license": "MIT",
   "devDependencies": {
     "bower": "^1.7.1",
+    "nwrun": "https://github.com/jmmendivil/nwrun",
     "coffee-script": "^1.10.0",
     "coffeelint": "^1.12.1",
     "nahual": "0.0.2",
