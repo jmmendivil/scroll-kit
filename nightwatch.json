@@ -10,5 +10,9 @@
         "tunnel-identifier": "${TRAVIS_JOB_NUMBER}"
       }
     }
+  },
+  "test_workers": {
+    "enabled": true,
+    "workers": "auto"
   }
 }
