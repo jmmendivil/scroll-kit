@@ -1,4 +1,4 @@
-VERSION = '0.3.4'
+VERSION = '0.3.5'
 
 offsets = {}
 group_id = 0
@@ -348,7 +348,7 @@ initialize_sticky = (node) ->
   return
 
 destroy_sticky = (node) ->
-  node.el.attr('style', '').removeClass 'fit stuck bottom'
+  node.el.attr('style', '').removeClass 'fit stuck bottom sit'
   node.placeholder.remove()
   return
 
